@@ -19,7 +19,7 @@ export const USER_TOKENS: Record<string, string> = {
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.sfDKQ5peCwo0oObPDo-AFKauqv5uYbesukOOLpKaDOQ',
   vir: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmlyIn0.Whk_WyeN9TIuNahSu3KFVRTohF7HDbQq9Ka17kZ6zq4',
   vishal:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmlzaGFsIn0.HOlVh-ZyQnjyuL20G-67RTgKufBuAH-I-gbEELFlass',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidmlzaGFsIn0._du42Z8uss2WPin-M_BCbboICxSIiCvV7G-9qAmpAq8',
 };
 export const USERS: Record<string, UserResponse<StreamChatGenerics>> = {
   neil: {

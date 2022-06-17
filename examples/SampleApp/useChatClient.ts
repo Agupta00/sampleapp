@@ -21,7 +21,9 @@ export const useChatClient = () => {
       name: config.userName,
     };
 
-    await client.connectUser(user, config.userToken);
+    const res = await client.connectUser(user, config.userToken);
+    console.log('conntect user result: ', res);
+    console.log('client', client);
     await AsyncStore.setItem('@stream-rn-sampleapp-login-config', config);
 
     setChatClient(client);

@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ScrollView,
@@ -8,7 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { RouteProp, useNavigation } from '@react-navigation/native';
+import { PrivateValueStore, RouteProp, useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Avatar,
@@ -16,6 +18,10 @@ import {
   useOverlayContext,
   useTheme,
 } from 'stream-chat-react-native';
+
+// import { AsyncStorage } from '../utils/AsyncStore';
+import AsyncStorage from '../utils/AsyncStore';
+import { fetchPost } from '../utils/fetch';
 
 import { RoundButton } from '../components/RoundButton';
 import { ScreenHeader } from '../components/ScreenHeader';
@@ -40,6 +46,8 @@ import type { Channel, UserResponse } from 'stream-chat';
 
 import type { StackNavigatorParamList, StreamChatGenerics } from '../types';
 import { Pin } from '../icons/Pin';
+
+const FETCH_STALE_TIME_SECONDS = 30;
 
 const styles = StyleSheet.create({
   actionContainer: {
@@ -175,11 +183,62 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
   );
   const [groupName, setGroupName] = useState(channel.data?.name);
   const allMembers = Object.values(channel.state.members);
+  const allMembersNames = allMembers.map((m) => m.user?.name);
   const [members, setMembers] = useState(allMembers.slice(0, 3));
   const [textInputFocused, setTextInputFocused] = useState(false);
 
   const membersStatus = useChannelMembersStatus(channel);
   const displayName = useChannelPreviewDisplayName<StreamChatGenerics>(channel, 30);
+
+  //TODO A better solution would be to have the backend tell us when we can re-start the game.
+
+  const [userDetailsState, setUserDetailsState] = useState({
+    // gameStarted: false, //for development
+    gameStarted: true, //Start of as true since we don't want the user to be able to create a game until we are sure they should be able to.
+    targetPlayers: ['Pending'],
+    lastFetchedMillis: -1,
+  });
+
+  const getUserDetails = async (gameId = 'game1') => {
+    const millisToSec = (millis: number) => millis * 1e-3;
+
+    const storedUserDetails: any = await AsyncStorage.getItem(gameId, null);
+    let needsFetch = true;
+    if (storedUserDetails) {
+      const timeElapsedSeconds =
+        millisToSec(performance.now()) - millisToSec(storedUserDetails.lastFetchedMillis);
+
+      console.log('storedUserDetails', storedUserDetails);
+      if (timeElapsedSeconds < FETCH_STALE_TIME_SECONDS) {
+        setUserDetailsState(storedUserDetails);
+        needsFetch = false;
+      }
+    }
+
+    // If we haven't checked yet, or it has been some time since we last checked.
+    if (needsFetch) {
+      await fetchPost('http://localhost:5001/game-7bb7c/us-central1/userDetails', {
+        gameId: 'game1',
+        requestUserName: chatClient?.user?.id,
+      })
+        .then((res: any) => {
+          console.log('getuserdetails res()', res, typeof res);
+          const newUserDetails = {
+            gameStarted: res.gameStarted,
+            targetPlayers: res.targetPlayers,
+            lastFetchedMillis: performance.now(),
+          };
+          setUserDetailsState(newUserDetails);
+          AsyncStorage.setItem(gameId, newUserDetails);
+        })
+        .catch((err) => console.warn('getUserDetails()', err));
+    }
+  };
+
+  //TODO Right now once the game is started the user can't create a new game.
+  useEffect(() => {
+    getUserDetails();
+  }, []);
 
   const allMembersLength = allMembers.length;
   useEffect(() => {
@@ -190,6 +249,67 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
 
   const channelCreatorId =
     channel.data && (channel.data.created_by_id || (channel.data.created_by as UserResponse)?.id);
+
+  const hitPlayer = async (gameId = 'game1') => {
+    //TODO catch failure
+    const res = await fetchPost(
+      'http://localhost:5001/game-7bb7c/us-central1/requestHitPlayerEmpty',
+      {
+        gameId: 'game1',
+        requestUserName: chatClient?.user?.id,
+      },
+    );
+
+    console.log('GroupChannelDetailsScreen@hitPlayer');
+    console.log(res);
+
+    setUserDetailsState((prevState) => ({
+      ...prevState,
+      targetPlayers: ['Pending'],
+    }));
+
+    setAppOverlay('none');
+    setOverlay('none');
+  };
+
+  const openHitPlayerConfirmationSheet = () => {
+    if (chatClient?.user?.id) {
+      setBottomSheetOverlayData({
+        confirmText: 'Tag',
+        onConfirm: hitPlayer,
+        subtext: `Please be fair! This can not be undone.`,
+        title: 'Tag Opponent',
+      });
+      setAppOverlay('confirmation');
+    }
+  };
+
+  const openStartGameConfirmationSheet = () => {
+    if (chatClient?.user?.id) {
+      setBottomSheetOverlayData({
+        confirmText: 'Start',
+        onConfirm: startGame,
+        subtext: `Start the game? This can not be undone!`,
+        title: 'Start Game',
+      });
+      setAppOverlay('confirmation');
+    }
+  };
+
+  /**
+   * Opens confirmation sheet for leaving the group
+   */
+  const openJoinGameConfirmationSheet = () => {
+    if (chatClient?.user?.id) {
+      setBottomSheetOverlayData({
+        confirmText: 'Join',
+        onConfirm: leaveGroup,
+        subtext: `Are you sure you want to join the game ${groupName || ''}? The wager is $10. `,
+        title: 'Join Game',
+      });
+      setAppOverlay('confirmation');
+    }
+  };
 
   /**
    * Opens confirmation sheet for leaving the group
@@ -218,6 +338,93 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     }
   };
 
+  const startGame = async () => {
+    //TODO use player names from chat.
+    //TODO Handle case where game not able to be created.
+    const playerNames = ['vishal', 'neil', 'ben', 'nick'];
+
+    const res = await fetchPost('http://localhost:5001/game-7bb7c/us-central1/createGame', {
+      playerNames,
+    });
+
+    console.log('GroupChannelDetailsScreen@startGame');
+    console.log(res);
+
+    //TODO check for error case here
+    setUserDetailsState((prevState) => ({
+      ...prevState,
+      gameStarted: true,
+      lastFetchedMillis: performance.now(),
+    }));
+
+    // async function postData(url = '', data = {}) {
+    //   // Default options are marked with *
+    //   const response = await fetch(url, {
+    //     mode: 'cors', // no-cors, *cors, same-origin
+    //     cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+    //     credentials: 'same-origin', // include, *same-origin, omit
+    //     headers: {
+    //       'Content-Type': 'application/json'
+    //       // 'Content-Type': 'application/x-www-form-urlencoded',
+    //     },
+    //     redirect: 'follow', // manual, *follow, error
+    //     referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    //     body: JSON.stringify(data) // body data type must match "Content-Type" header
+    //   });
+    //   return response.json(); // parses JSON response into native JavaScript objects
+    // }
+
+    // axios
+    //   .post(`http://localhost:5001/game-7bb7c/us-central1/createGame`, { playerNames })
+    //   //TODO handle error cases.
+    //   //TODO wrapper to handle network and other types of failures
+    //   .then((res) => {
+    //     console.log('GroupChannelDetailsScreen@startGame');
+    //     console.log(res);
+    //     console.log(res.data);
+
+    //     //TODO check for error case here
+    //     setGameStartedState({ gameStarted: true, lastFetchedMillis: performance.now() });
+    //   })
+    //   .catch((err) => {
+    //     console.log('Failed to make POST to `createGame` endpoint ');
+    //     console.log(err);
+    //   });
+
+    setAppOverlay('none');
+    setOverlay('none');
+
+    //Don't navigate back since we can't update gameStartedState.
+    //TODO should set such data somehwere else.
+
+    //There shouldn't be a case where we don't have anything to go back to.
+    // if (!navigation.canGoBack()) {
+    //   console.warn('nothing to go back to');
+    // } else {
+    //   navigation.goBack();
+    // }
+  };
+
+  //TODO add wager logic here.
+  // const joinGame = async () => {
+  //   if (chatClient?.user?.id) {
+  //     await channel.removeMembers([chatClient?.user?.id]);
+  //   }
+
+  //   // setBlurType(undefined);
+  //   setAppOverlay('none');
+  //   setOverlay('none');
+
+  //   navigation.reset({
+  //     index: 0,
+  //     routes: [
+  //       {
+  //         name: 'ChatScreen',
+  //       },
+  //     ],
+  //   });
+  // };
+
   /**
    * Leave the group/channel
    */
@@ -226,7 +433,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
       await channel.removeMembers([chatClient?.user?.id]);
     }
 
-    setBlurType(undefined);
+    // setBlurType(undefined);
     setAppOverlay('none');
     setOverlay('none');
 
@@ -531,6 +738,95 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
               </Text>
             </View>
           </TouchableOpacity>
+
+          {
+            /* JoinGame */
+            <TouchableOpacity
+              onPress={openJoinGameConfirmationSheet}
+              style={[
+                styles.actionContainer,
+                {
+                  borderBottomColor: border,
+                },
+              ]}
+            >
+              <View style={styles.actionLabelContainer}>
+                <RemoveUser height={24} width={24} />
+                <Text
+                  style={[
+                    styles.itemText,
+                    {
+                      color: black,
+                    },
+                  ]}
+                >
+                  Join Game
+                </Text>
+              </View>
+            </TouchableOpacity>
+          }
+          {
+            /* Moderator options */
+            // TODO more correct logic here.
+            channelCreatorId === chatClient?.user?.id && (
+              <TouchableOpacity
+                //TODO change color when not possible to start game
+                disabled={userDetailsState.gameStarted}
+                onPress={openStartGameConfirmationSheet}
+                style={[
+                  styles.actionContainer,
+                  {
+                    borderBottomColor: border,
+                    backgroundColor: userDetailsState.gameStarted ? '#F5F4F4' : '',
+                  },
+                ]}
+              >
+                <View style={styles.actionLabelContainer}>
+                  <RemoveUser height={24} width={24} />
+                  <Text
+                    style={[
+                      styles.itemText,
+                      {
+                        color: black,
+                      },
+                    ]}
+                  >
+                    Start Game
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )
+          }
+          {
+            /* Hit Player */
+            userDetailsState.gameStarted && userDetailsState.targetPlayers[0] !== 'Pending' && (
+              <TouchableOpacity
+                // disabled={userDetailsState.targetPlayers[0] === 'Pending'}
+                onPress={openHitPlayerConfirmationSheet}
+                style={[
+                  styles.actionContainer,
+                  {
+                    borderBottomColor: border,
+                  },
+                ]}
+              >
+                <View style={styles.actionLabelContainer}>
+                  <RemoveUser height={24} width={24} />
+                  <Text
+                    style={[
+                      styles.itemText,
+                      {
+                        color: black,
+                      },
+                    ]}
+                  >
+                    {/* TODO this is only for the single target case. */}
+                    Tag {userDetailsState.targetPlayers[0]}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )
+          }
         </>
       </ScrollView>
     </SafeAreaView>

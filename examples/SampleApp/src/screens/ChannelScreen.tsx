@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import type { Channel as StreamChatChannel } from 'stream-chat';
 import { RouteProp, useFocusEffect, useNavigation } from '@react-navigation/native';
 import {
   Channel,
   ChannelAvatar,
+  DefaultStreamChatGenerics,
   MessageInput,
   MessageList,
   ThreadContextValue,
@@ -24,6 +25,83 @@ import { useChannelMembersStatus } from '../hooks/useChannelMembersStatus';
 
 import type { StackNavigatorParamList, StreamChatGenerics } from '../types';
 import { NetworkDownIndicator } from '../components/NetworkDownIndicator';
+
+import { AttachmentActions, AttachmentActionsProps } from 'stream-chat-react-native';
+
+const handleAction = (name: string, value: string) => {
+  console.log(`handle action ${name}, ${value}`);
+};
+
+const actions = [
+  // style can be default, primary or danger
+  { name: 'Blue', value: 'blue', style: 'primary', text: 'Blue' },
+  { name: 'Green', value: 'green', style: 'default', text: 'Green' },
+  { name: 'Orange', value: 'orange', style: 'danger', text: 'Orange' },
+];
+
+const props: AttachmentActionsProps<DefaultStreamChatGenerics> = {
+  actions,
+  displayName: 'myHandler',
+  handleAction,
+};
+
+const testAttachment = () => {
+  const handleAction = (name: string, value: string) => {
+    console.log(`handle action ${name}, ${value}`);
+  };
+
+  const actions = [
+    // style can be default, primary or danger
+    { name: 'Blue', value: 'blue', style: 'primary', text: 'Blue' },
+    { name: 'Green', value: 'green', style: 'default', text: 'Green' },
+    { name: 'Orange', value: 'orange', style: 'danger', text: 'Orange' },
+  ];
+
+  const props: AttachmentActionsProps<DefaultStreamChatGenerics> = {
+    actions,
+    displayName: 'myHandler',
+    handleAction,
+  };
+
+  return (
+    <AttachmentActions actions={actions} displayName={'myHandler'} handleAction={handleAction} />
+  );
+
+  // type Props = {
+  //   foo: number,
+  //   bar: number,
+  // };
+
+  // function createMyElement<C: React.ComponentType<Props>>(
+  //   Component: C,
+  // ): React.Element<C> {
+  //   return <Component foo={1} bar={2} />;
+  // }
+
+  // return <AttachmentActions {...props} />;
+  // return <AttachmentActions {...props} />;
+  // return AttachmentActions({ ...props });
+  // return AttachmentActions(props);
+  return AttachmentActions;
+
+  // function createMyElement<C: React.ComponentType<AttachmentActionsProps>>(
+  //   Component: C,
+  // ): React.Element<C> {
+  //   return <Component foo={1} bar={2} />;
+  // }
+
+  // return React.ComponentType<AttachmentActionsProps>()
+  return props;
+
+  // const aa = AttachmentActions(props);
+  // aa.handleAction;
+
+  // return {
+  //   actions,
+  //   handleAction,
+  // };
+  // return aa;
+};
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
@@ -66,6 +144,7 @@ const ChannelHeader: React.FC<ChannelHeaderProps> = ({ channel }) => {
           // if no previous screen was present in history, go to the list screen
           // this can happen when opened through push notification
           navigation.navigate('ChatScreen');
+          console.log('navigating to chatscreen');
         }
       }}
       RightContent={() => (
@@ -100,6 +179,7 @@ export const ChannelScreen: React.FC<ChannelScreenProps> = ({
     params: { channel: channelFromProp, channelId, messageId },
   },
 }) => {
+  // console.log('ChannelScreen got props', channelFromProp);
   const { chatClient } = useAppContext();
   const navigation = useNavigation();
   const { bottom } = useSafeAreaInsets();
@@ -140,6 +220,7 @@ export const ChannelScreen: React.FC<ChannelScreenProps> = ({
   return (
     <View style={[styles.flex, { backgroundColor: white, paddingBottom: bottom }]}>
       <Channel
+        // AttachmentActions={testAttachment()}
         channel={channel}
         disableTypingIndicator
         enforceUniqueReaction

@@ -60,7 +60,7 @@
         "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
       }
     ],
-    "sort-keys": ["error", "asc", { "caseSensitive": false, "minKeys": 2, "natural": false }],
+    // "sort-keys": ["error", "asc", { "caseSensitive": false, "minKeys": 2, "natural": false }],
     "valid-typeof": 2
   },
   "settings": {
@@ -171,17 +171,17 @@
             "memberSyntaxSortOrder": ["none", "all", "multiple", "single"]
           }
         ],
-        "sort-keys": ["error", "asc", { "caseSensitive": false, "minKeys": 2, "natural": false }],
-        "typescript-sort-keys/interface": [
-          "error",
-          "asc",
-          { "caseSensitive": false, "natural": true, "requiredFirst": true }
-        ],
-        "typescript-sort-keys/string-enum": [
-          "error",
-          "asc",
-          { "caseSensitive": false, "natural": true }
-        ],
+        // "sort-keys": ["error", "asc", { "caseSensitive": false, "minKeys": 2, "natural": false }],
+        // "typescript-sort-keys/interface": [
+        //   "error",
+        //   "asc",
+        //   { "caseSensitive": false, "natural": true, "requiredFirst": true }
+        // ],
+        // "typescript-sort-keys/string-enum": [
+        //   "error",
+        //   "asc",
+        //   { "caseSensitive": false, "natural": true }
+        // ],
         "valid-typeof": 2
       }
     }
