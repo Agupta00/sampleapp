@@ -47,7 +47,8 @@ import type { Channel, UserResponse } from 'stream-chat';
 import type { StackNavigatorParamList, StreamChatGenerics } from '../types';
 import { Pin } from '../icons/Pin';
 
-const FETCH_STALE_TIME_SECONDS = 30;
+//Don't need this anymore
+const FETCH_STALE_TIME_SECONDS = 300000000000;
 
 const styles = StyleSheet.create({
   actionContainer: {
@@ -183,23 +184,24 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
   );
   const [groupName, setGroupName] = useState(channel.data?.name);
   const allMembers = Object.values(channel.state.members);
-  const allMembersNames = allMembers.map((m) => m.user?.name);
   const [members, setMembers] = useState(allMembers.slice(0, 3));
   const [textInputFocused, setTextInputFocused] = useState(false);
 
   const membersStatus = useChannelMembersStatus(channel);
   const displayName = useChannelPreviewDisplayName<StreamChatGenerics>(channel, 30);
+  const gameId = channel.id ? channel.id : '';
 
   //TODO A better solution would be to have the backend tell us when we can re-start the game.
 
   const [userDetailsState, setUserDetailsState] = useState({
     // gameStarted: false, //for development
+    dataLoaded: false,
     gameStarted: true, //Start of as true since we don't want the user to be able to create a game until we are sure they should be able to.
-    targetPlayers: ['Pending'],
+    targetPlayers: [],
     lastFetchedMillis: -1,
   });
 
-  const getUserDetails = async (gameId = 'game1') => {
+  const getUserDetails = async () => {
     const millisToSec = (millis: number) => millis * 1e-3;
 
     const storedUserDetails: any = await AsyncStorage.getItem(gameId, null);
@@ -210,7 +212,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
 
       console.log('storedUserDetails', storedUserDetails);
       if (timeElapsedSeconds < FETCH_STALE_TIME_SECONDS) {
-        setUserDetailsState(storedUserDetails);
+        setUserDetailsState({ dataLoaded: true, ...storedUserDetails });
         needsFetch = false;
       }
     }
@@ -218,7 +220,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     // If we haven't checked yet, or it has been some time since we last checked.
     if (needsFetch) {
       await fetchPost('http://localhost:5001/game-7bb7c/us-central1/userDetails', {
-        gameId: 'game1',
+        gameId,
         requestUserName: chatClient?.user?.id,
       })
         .then((res: any) => {
@@ -228,7 +230,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
             targetPlayers: res.targetPlayers,
             lastFetchedMillis: performance.now(),
           };
-          setUserDetailsState(newUserDetails);
+          setUserDetailsState({ dataLoaded: true, ...newUserDetails });
           AsyncStorage.setItem(gameId, newUserDetails);
         })
         .catch((err) => console.warn('getUserDetails()', err));
@@ -250,23 +252,30 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
   const channelCreatorId =
     channel.data && (channel.data.created_by_id || (channel.data.created_by as UserResponse)?.id);
 
-  const hitPlayer = async (gameId = 'game1') => {
+  const hitPlayer = async () => {
     //TODO catch failure
-    const res = await fetchPost(
+    const res: any = await fetchPost(
       'http://localhost:5001/game-7bb7c/us-central1/requestHitPlayerEmpty',
       {
-        gameId: 'game1',
+        gameId,
         requestUserName: chatClient?.user?.id,
       },
     );
 
     console.log('GroupChannelDetailsScreen@hitPlayer');
-    console.log(res);
+    console.log('hitplayer res', res);
 
     setUserDetailsState((prevState) => ({
       ...prevState,
-      targetPlayers: ['Pending'],
+      lastFetchedMillis: performance.now(),
+      targetPlayers: res.newTargetUsers,
     }));
+
+    AsyncStorage.setItem(gameId, {
+      gameStarted: true,
+      lastFetchedMillis: performance.now(),
+      targetPlayers: res.newTargetUsers,
+    });
 
     setAppOverlay('none');
     setOverlay('none');
@@ -341,10 +350,13 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
   const startGame = async () => {
     //TODO use player names from chat.
     //TODO Handle case where game not able to be created.
-    const playerNames = ['vishal', 'neil', 'ben', 'nick'];
 
+    // const playerNames = ['vishal', 'neil', 'ben', 'nick'];
+    const memberNames = allMembers.map((m) => m.user?.id);
+    const playerNames = memberNames.filter((userId) => userId !== channelCreatorId);
     const res = await fetchPost('http://localhost:5001/game-7bb7c/us-central1/createGame', {
       playerNames,
+      gameId,
     });
 
     console.log('GroupChannelDetailsScreen@startGame');
@@ -356,6 +368,12 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
       gameStarted: true,
       lastFetchedMillis: performance.now(),
     }));
+
+    AsyncStorage.setItem(gameId, {
+      gameStarted: true,
+      lastFetchedMillis: -1,
+      targetPlayers: [],
+    });
 
     // async function postData(url = '', data = {}) {
     //   // Default options are marked with *
@@ -447,6 +465,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     });
   };
 
+  console.log('state ', userDetailsState);
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: white }]}>
       <ScreenHeader
@@ -777,7 +796,8 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
                   styles.actionContainer,
                   {
                     borderBottomColor: border,
-                    backgroundColor: userDetailsState.gameStarted ? '#F5F4F4' : '',
+                    backgroundColor:
+                      userDetailsState.gameStarted && userDetailsState.dataLoaded ? '#F5F4F4' : '',
                   },
                 ]}
               >
@@ -799,9 +819,9 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
           }
           {
             /* Hit Player */
-            userDetailsState.gameStarted && userDetailsState.targetPlayers[0] !== 'Pending' && (
+            userDetailsState.gameStarted && userDetailsState.targetPlayers.length !== 0 && (
               <TouchableOpacity
-                // disabled={userDetailsState.targetPlayers[0] === 'Pending'}
+                // disabled={userDetailsState.targetPlayers[0] === ''}
                 onPress={openHitPlayerConfirmationSheet}
                 style={[
                   styles.actionContainer,
