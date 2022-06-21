@@ -16,6 +16,7 @@ export type UserInfoOverlayData = Partial<
 > & {
   member?: ChannelState<StreamChatGenerics>['members'][0];
   navigation?: GroupChannelDetailsScreenNavigationProp;
+  gameStarted?: boolean;
 };
 
 export type UserInfoOverlayContextValue = {

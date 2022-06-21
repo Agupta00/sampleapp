@@ -211,7 +211,10 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
         millisToSec(performance.now()) - millisToSec(storedUserDetails.lastFetchedMillis);
 
       console.log('storedUserDetails', storedUserDetails);
-      if (timeElapsedSeconds < FETCH_STALE_TIME_SECONDS) {
+      if (
+        userDetailsState.targetPlayers.length !== 0 &&
+        timeElapsedSeconds < FETCH_STALE_TIME_SECONDS
+      ) {
         setUserDetailsState({ dataLoaded: true, ...storedUserDetails });
         needsFetch = false;
       }
@@ -353,7 +356,9 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
 
     // const playerNames = ['vishal', 'neil', 'ben', 'nick'];
     const memberNames = allMembers.map((m) => m.user?.id);
-    const playerNames = memberNames.filter((userId) => userId !== channelCreatorId);
+    //Admin can't play
+    // const playerNames = memberNames.filter((userId) => userId !== channelCreatorId);
+    const playerNames = memberNames;
     const res = await fetchPost('http://localhost:5001/game-7bb7c/us-central1/createGame', {
       playerNames,
       gameId,
@@ -423,26 +428,6 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     // }
   };
 
-  //TODO add wager logic here.
-  // const joinGame = async () => {
-  //   if (chatClient?.user?.id) {
-  //     await channel.removeMembers([chatClient?.user?.id]);
-  //   }
-
-  //   // setBlurType(undefined);
-  //   setAppOverlay('none');
-  //   setOverlay('none');
-
-  //   navigation.reset({
-  //     index: 0,
-  //     routes: [
-  //       {
-  //         name: 'ChatScreen',
-  //       },
-  //     ],
-  //   });
-  // };
-
   /**
    * Leave the group/channel
    */
@@ -493,6 +478,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
                     channel,
                     member,
                     navigation,
+                    gameStarted: userDetailsState.gameStarted,
                   });
                   setAppOverlay('userInfo');
                 }
@@ -790,7 +776,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
             channelCreatorId === chatClient?.user?.id && (
               <TouchableOpacity
                 //TODO change color when not possible to start game
-                disabled={userDetailsState.gameStarted}
+                // disabled={userDetailsState.gameStarted}
                 onPress={openStartGameConfirmationSheet}
                 style={[
                   styles.actionContainer,

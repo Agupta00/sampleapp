@@ -112,7 +112,7 @@ export const UserInfoOverlay = (props: UserInfoOverlayProps) => {
   const { setData } = useBottomSheetOverlayContext();
   const { data, reset } = useUserInfoOverlayContext();
 
-  const { channel, member, navigation } = data || {};
+  const { channel, gameStarted, member, navigation } = data || {};
 
   const {
     theme: {
@@ -369,7 +369,7 @@ export const UserInfoOverlay = (props: UserInfoOverlayProps) => {
                           <Text style={[styles.rowText, { color: black }]}>Message</Text>
                         </View>
                       </TapGestureHandler>
-                      {channelCreatorId === chatClient?.user?.id ? (
+                      {!gameStarted && channelCreatorId === chatClient?.user?.id ? (
                         <TapGestureHandler
                           onHandlerStateChange={({ nativeEvent: { state } }) => {
                             if (state === State.END) {
