@@ -222,7 +222,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
 
     // If we haven't checked yet, or it has been some time since we last checked.
     if (needsFetch) {
-      await fetchPost('http://localhost:5001/game-7bb7c/us-central1/userDetails', {
+      await fetchPost(`:5001/game-7bb7c/us-central1/userDetails`, {
         gameId,
         requestUserName: chatClient?.user?.id,
       })
@@ -257,13 +257,10 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
 
   const hitPlayer = async () => {
     //TODO catch failure
-    const res: any = await fetchPost(
-      'http://localhost:5001/game-7bb7c/us-central1/requestHitPlayerEmpty',
-      {
-        gameId,
-        requestUserName: chatClient?.user?.id,
-      },
-    );
+    const res: any = await fetchPost(':5001/game-7bb7c/us-central1/requestHitPlayerEmpty', {
+      gameId,
+      requestUserName: chatClient?.user?.id,
+    });
 
     console.log('GroupChannelDetailsScreen@hitPlayer');
     console.log('hitplayer res', res);
@@ -315,7 +312,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     if (chatClient?.user?.id) {
       setBottomSheetOverlayData({
         confirmText: 'Join',
-        onConfirm: leaveGroup,
+        onConfirm: () => leaveGroup,
         subtext: `Are you sure you want to join the game ${groupName || ''}? The wager is $10. `,
         title: 'Join Game',
       });
@@ -359,7 +356,8 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     //Admin can't play
     // const playerNames = memberNames.filter((userId) => userId !== channelCreatorId);
     const playerNames = memberNames;
-    const res = await fetchPost('http://localhost:5001/game-7bb7c/us-central1/createGame', {
+    const res = await fetchPost(':5001/game-7bb7c/us-central1/createGame', {
+      moderatorUserId: chatClient?.user?.id,
       playerNames,
       gameId,
     });
@@ -379,40 +377,6 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
       lastFetchedMillis: -1,
       targetPlayers: [],
     });
-
-    // async function postData(url = '', data = {}) {
-    //   // Default options are marked with *
-    //   const response = await fetch(url, {
-    //     mode: 'cors', // no-cors, *cors, same-origin
-    //     cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-    //     credentials: 'same-origin', // include, *same-origin, omit
-    //     headers: {
-    //       'Content-Type': 'application/json'
-    //       // 'Content-Type': 'application/x-www-form-urlencoded',
-    //     },
-    //     redirect: 'follow', // manual, *follow, error
-    //     referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-    //     body: JSON.stringify(data) // body data type must match "Content-Type" header
-    //   });
-    //   return response.json(); // parses JSON response into native JavaScript objects
-    // }
-
-    // axios
-    //   .post(`http://localhost:5001/game-7bb7c/us-central1/createGame`, { playerNames })
-    //   //TODO handle error cases.
-    //   //TODO wrapper to handle network and other types of failures
-    //   .then((res) => {
-    //     console.log('GroupChannelDetailsScreen@startGame');
-    //     console.log(res);
-    //     console.log(res.data);
-
-    //     //TODO check for error case here
-    //     setGameStartedState({ gameStarted: true, lastFetchedMillis: performance.now() });
-    //   })
-    //   .catch((err) => {
-    //     console.log('Failed to make POST to `createGame` endpoint ');
-    //     console.log(err);
-    //   });
 
     setAppOverlay('none');
     setOverlay('none');
@@ -450,7 +414,6 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     });
   };
 
-  console.log('state ', userDetailsState);
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: white }]}>
       <ScreenHeader
@@ -807,7 +770,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
             /* Hit Player */
             userDetailsState.gameStarted && userDetailsState.targetPlayers.length !== 0 && (
               <TouchableOpacity
-                // disabled={userDetailsState.targetPlayers[0] === ''}
+                // disabled={userDetailsState.targetPlayers[0] === 'pending'}
                 onPress={openHitPlayerConfirmationSheet}
                 style={[
                   styles.actionContainer,
