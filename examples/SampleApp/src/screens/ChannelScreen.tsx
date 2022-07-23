@@ -28,79 +28,27 @@ import { NetworkDownIndicator } from '../components/NetworkDownIndicator';
 
 import { AttachmentActions, AttachmentActionsProps } from 'stream-chat-react-native';
 
-const handleAction = (name: string, value: string) => {
-  console.log(`handle action ${name}, ${value}`);
-};
+import { fetchPost } from '../utils/fetch';
 
-const actions = [
-  // style can be default, primary or danger
-  { name: 'Blue', value: 'blue', style: 'primary', text: 'Blue' },
-  { name: 'Green', value: 'green', style: 'default', text: 'Green' },
-  { name: 'Orange', value: 'orange', style: 'danger', text: 'Orange' },
-];
-
-const props: AttachmentActionsProps<DefaultStreamChatGenerics> = {
-  actions,
-  displayName: 'myHandler',
-  handleAction,
-};
-
-const testAttachment = () => {
-  const handleAction = (name: string, value: string) => {
+const TestAttachment: React.ComponentType<AttachmentActionsProps<StreamChatGenerics>> = (props) => {
+  const handleAction = async (name: string, value: string) => {
     console.log(`handle action ${name}, ${value}`);
+    switch (name) {
+      case 'confirm':
+      case 'deny':
+      case 'dispute': {
+        await fetchPost(`:5001/game-7bb7c/us-central1/handleMessageAction`, {
+          actionValue: value,
+        });
+        //TODO handle failure cases
+        return;
+      }
+      default:
+        console.log('[channelScreen@handleAction] unhandled action');
+    }
   };
 
-  const actions = [
-    // style can be default, primary or danger
-    { name: 'Blue', value: 'blue', style: 'primary', text: 'Blue' },
-    { name: 'Green', value: 'green', style: 'default', text: 'Green' },
-    { name: 'Orange', value: 'orange', style: 'danger', text: 'Orange' },
-  ];
-
-  const props: AttachmentActionsProps<DefaultStreamChatGenerics> = {
-    actions,
-    displayName: 'myHandler',
-    handleAction,
-  };
-
-  return (
-    <AttachmentActions actions={actions} displayName={'myHandler'} handleAction={handleAction} />
-  );
-
-  // type Props = {
-  //   foo: number,
-  //   bar: number,
-  // };
-
-  // function createMyElement<C: React.ComponentType<Props>>(
-  //   Component: C,
-  // ): React.Element<C> {
-  //   return <Component foo={1} bar={2} />;
-  // }
-
-  // return <AttachmentActions {...props} />;
-  // return <AttachmentActions {...props} />;
-  // return AttachmentActions({ ...props });
-  // return AttachmentActions(props);
-  return AttachmentActions;
-
-  // function createMyElement<C: React.ComponentType<AttachmentActionsProps>>(
-  //   Component: C,
-  // ): React.Element<C> {
-  //   return <Component foo={1} bar={2} />;
-  // }
-
-  // return React.ComponentType<AttachmentActionsProps>()
-  return props;
-
-  // const aa = AttachmentActions(props);
-  // aa.handleAction;
-
-  // return {
-  //   actions,
-  //   handleAction,
-  // };
-  // return aa;
+  return <AttachmentActions {...props} handleAction={handleAction} />;
 };
 
 const styles = StyleSheet.create({
@@ -220,7 +168,7 @@ export const ChannelScreen: React.FC<ChannelScreenProps> = ({
   return (
     <View style={[styles.flex, { backgroundColor: white, paddingBottom: bottom }]}>
       <Channel
-        // AttachmentActions={testAttachment()}
+        AttachmentActions={TestAttachment}
         channel={channel}
         disableTypingIndicator
         enforceUniqueReaction
