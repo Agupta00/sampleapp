@@ -8,12 +8,15 @@ import AsyncStore from '../utils/AsyncStore';
 
 import type { LoginConfig, StreamChatGenerics } from '../types';
 
+//todo enable push notifications
+const enablePush = false;
 // Request Push Notification permission from device.
 const requestNotificationPermission = async () => {
   const authStatus = await messaging().requestPermission();
   const isEnabled =
-    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    enablePush &&
+    (authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL);
   console.log('Permission Status', { authStatus, isEnabled });
 };
 
@@ -87,8 +90,9 @@ export const useChatClient = () => {
 
     const permissionAuthStatus = await messaging().hasPermission();
     const isEnabled =
-      permissionAuthStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-      permissionAuthStatus === messaging.AuthorizationStatus.PROVISIONAL;
+      enablePush &&
+      (permissionAuthStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        permissionAuthStatus === messaging.AuthorizationStatus.PROVISIONAL);
 
     if (isEnabled) {
       // Register FCM token with stream chat server.
