@@ -28,6 +28,9 @@ import { OneOnOneChannelDetailScreen } from './src/screens/OneOnOneChannelDetail
 import { SharedGroupsScreen } from './src/screens/SharedGroupsScreen';
 import { ThreadScreen } from './src/screens/ThreadScreen';
 import { UserSelectorScreen } from './src/screens/UserSelectorScreen';
+// import LoginScreen from 'react-native-login-screen';
+import LoginScreen from './src/LoginScreen/LoginScreen';
+import SignUpScreen from './src/LoginScreen/SignUpScreen';
 
 import type { StreamChat } from 'stream-chat';
 
@@ -134,7 +137,8 @@ const App = () => {
           ) : chatClient ? (
             <DrawerNavigatorWrapper chatClient={chatClient} />
           ) : (
-            <UserSelector />
+            // <UserSelector />
+            <LoginSelector />
           )}
         </AppContext.Provider>
       </NavigationContainer>
@@ -176,6 +180,58 @@ const DrawerNavigatorWrapper: React.FC<{
     </GestureHandlerRootView>
   );
 };
+
+const LoginStack = createStackNavigator();
+const LoginSelector = () => (
+  <LoginStack.Navigator initialRouteName='SignUpScreen' screenOptions={{ animationEnabled: false }}>
+    <LoginStack.Screen
+      component={LoginScreen}
+      name='LoginScreen'
+      options={{ gestureEnabled: false, headerShown: false }}
+    />
+    <LoginStack.Screen
+      component={SignUpScreen}
+      name='SignUpScreen'
+      options={{ gestureEnabled: false, headerShown: false }}
+    />
+  </LoginStack.Navigator>
+);
+
+type Props = {
+  // navigation: UserSelectorScreenNavigationProp;
+};
+
+// const signUpScreen: React.FC<Props> = ({ navigation }) => (
+//   <SignUpScreen
+//     disableSocialButtons={true}
+//     emailPlaceholder={'Phone'}
+//     loginButtonStyle={{ backgroundColor: '#453837' }}
+//     logoImageSource={require('./src/icons/statue.png')}
+//     logoImageStyle={{ width: 300, height: 300 }}
+//     onEmailChange={(email: string) => {}}
+//     onLoginPress={(data) => {
+//       console.log(data);
+//     }}
+//     onPasswordChange={(password: string) => {}}
+//     onSignupPress={() => {}}
+//     // passwordPlaceholer={`Pass`}
+//   />
+// );
+
+const loginScreen: React.FC<Props> = ({ navigation }) => (
+  <LoginScreen
+    disableSocialButtons={true}
+    emailPlaceholder={'Phone'}
+    loginButtonStyle={{ backgroundColor: '#453837' }}
+    logoImageSource={require('./src/icons/statue.png')}
+    logoImageStyle={{ width: 300, height: 300 }}
+    onEmailChange={(email: string) => {}}
+    onLoginPress={() => {}}
+    onPasswordChange={(password: string) => {}}
+    onSignupPress={() => {}}
+    // passwordPlaceholer={`Pass`}
+  />
+);
 
 const UserSelector = () => {
   const streamChatTheme = useStreamChatTheme();
