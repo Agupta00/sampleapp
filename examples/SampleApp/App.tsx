@@ -138,8 +138,8 @@ const App = () => {
             ) : chatClient ? (
               <DrawerNavigatorWrapper chatClient={chatClient} />
             ) : (
-                // <UserSelector />
-                <LoginSelector />
+              // <UserSelector />
+              <LoginSelector />
             )}
           </AppContext.Provider>
         </NavigationContainer>
