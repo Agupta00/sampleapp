@@ -6,6 +6,8 @@ export type Thumbnail = {
   url: string;
   width: number;
   id?: string;
+  thumb_url?: string;
+  type?: string;
 };
 
 export type GallerySizeConfig = {

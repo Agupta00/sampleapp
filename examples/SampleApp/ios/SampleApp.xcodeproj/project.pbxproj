@@ -514,7 +514,7 @@
 				CODE_SIGN_ENTITLEMENTS = SampleApp/SampleAppDebug.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 95;
+				CURRENT_PROJECT_VERSION = 141;
 				DEVELOPMENT_TEAM = 9TDTGWMZD6;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = SampleApp/Info.plist;
@@ -545,7 +545,7 @@
 				CODE_SIGN_ENTITLEMENTS = SampleApp/SampleAppRelease.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 95;
+				CURRENT_PROJECT_VERSION = 141;
 				DEVELOPMENT_TEAM = 9TDTGWMZD6;
 				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = SampleApp/Info.plist;

@@ -29,6 +29,7 @@
   "Ok": "확인",
   "Photo": "사진",
   "Photos": "사진",
+  "Photos and Videos": "사진과 동영상",
   "Pin to Conversation": "대화에 고정합니다",
   "Please enable access to your photos and videos so you can share them.": "사진 및 비디오에 대한 액세스를 사용하여 공유 할 수 있도록합니다.",
   "Please select a channel first": "먼저 채널을 선택하십시오",
@@ -46,6 +47,7 @@
   "Unmute User": "사용자 음소거 해제",
   "Unpin from Conversation": "대화의 핀을 분리합니다",
   "Unread Messages": "읽지 않은 메시지",
+  "Video": "동영상",
   "You": "당신",
   "{{ firstUser }} and {{ nonSelfUserLength }} more are typing": "{{ firstUser }} 외 {{ nonSelfUserLength }}명이 입력 중입니다",
   "{{ index }} of {{ photoLength }}": "{{ index }} / {{ photoLength }}",
@@ -63,5 +65,7 @@
   "Only visible to you": "당신만 볼 수 있습니다",
   "Reply": "답장",
   "Reply to Message": "메시지에 답장",
-  "🏙 Attachment...": "🏙 부착..."
+  "🏙 Attachment...": "🏙 부착...",
+  "File type not supported": "지원하지 않는 파일입니다.",
+  "Not supported": "지원하지 않습니다"
 }

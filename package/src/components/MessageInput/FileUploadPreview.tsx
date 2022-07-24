@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, I18nManager, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { UploadProgressIndicator } from './UploadProgressIndicator';
 
@@ -13,13 +13,16 @@ import {
   useMessagesContext,
 } from '../../contexts/messagesContext/MessagesContext';
 import { useTheme } from '../../contexts/themeContext/ThemeContext';
+import { useTranslationContext } from '../../contexts/translationContext/TranslationContext';
 import { Close } from '../../icons/Close';
+import { Warning } from '../../icons/Warning';
 import type { DefaultStreamChatGenerics } from '../../types/types';
-import { FileState, ProgressIndicatorTypes } from '../../utils/utils';
-
+import { getIndicatorTypeForFileState, ProgressIndicatorTypes } from '../../utils/utils';
 import { getFileSizeDisplayText } from '../Attachment/FileAttachment';
+import { WritingDirectionAwareText } from '../RTLComponents/WritingDirectionAwareText';
 
 const FILE_PREVIEW_HEIGHT = 60;
+const WARNING_ICON_SIZE = 16;
 
 const styles = StyleSheet.create({
   dismiss: {
@@ -43,11 +46,11 @@ const styles = StyleSheet.create({
   filenameText: {
     fontSize: 14,
     fontWeight: 'bold',
-    paddingLeft: 10,
+    paddingHorizontal: 10,
   },
   fileSizeText: {
     fontSize: 12,
-    paddingLeft: 10,
+    paddingHorizontal: 10,
   },
   fileTextContainer: {
     height: '100%',
@@ -59,7 +62,55 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     marginRight: 8,
   },
+  unsupportedFile: {
+    flexDirection: 'row',
+    paddingLeft: 10,
+  },
+  unsupportedFileText: {
+    fontSize: 12,
+    marginHorizontal: 4,
+  },
+  warningIconStyle: {
+    borderRadius: 24,
+    marginTop: 2,
+  },
 });
+
+const UnsupportedFileTypeOrFileSizeIndicator = ({
+  indicatorType,
+  item,
+}: {
+  indicatorType: typeof ProgressIndicatorTypes[keyof typeof ProgressIndicatorTypes];
+  item: FileUpload;
+}) => {
+  const {
+    theme: {
+      colors: { accent_red, grey },
+      messageInput: {
+        fileUploadPreview: { fileSizeText },
+      },
+    },
+  } = useTheme();
+
+  const { t } = useTranslationContext();
+  return indicatorType === ProgressIndicatorTypes.NOT_SUPPORTED ? (
+    <View style={styles.unsupportedFile}>
+      <Warning
+        height={WARNING_ICON_SIZE}
+        pathFill={accent_red}
+        style={styles.warningIconStyle}
+        width={WARNING_ICON_SIZE}
+      />
+      <Text style={[styles.unsupportedFileText, { color: grey }]}>
+        {t('File type not supported')}
+      </Text>
+    </View>
+  ) : (
+    <WritingDirectionAwareText style={[styles.fileSizeText, { color: grey }, fileSizeText]}>
+      {item.file.duration || getFileSizeDisplayText(item.file.size)}
+    </WritingDirectionAwareText>
+  );
+};
 
 type FileUploadPreviewPropsWithContext<
   StreamChatGenerics extends DefaultStreamChatGenerics = DefaultStreamChatGenerics,
@@ -81,14 +132,13 @@ const FileUploadPreviewWithContext = <
 
   const {
     theme: {
-      colors: { black, grey, grey_whisper, overlay },
+      colors: { black, grey_whisper, overlay },
       messageInput: {
         fileUploadPreview: {
           dismiss,
           fileContainer,
           fileContentContainer,
           filenameText,
-          fileSizeText,
           fileTextContainer,
           flatList,
         },
@@ -97,12 +147,7 @@ const FileUploadPreviewWithContext = <
   } = useTheme();
 
   const renderItem = ({ index, item }: { index: number; item: FileUpload }) => {
-    const indicatorType =
-      item.state === FileState.UPLOADING
-        ? ProgressIndicatorTypes.IN_PROGRESS
-        : item.state === FileState.UPLOAD_FAILED
-        ? ProgressIndicatorTypes.RETRY
-        : undefined;
+    const indicatorType = getIndicatorTypeForFileState(item.state);
 
     return (
       <>
@@ -110,7 +155,6 @@ const FileUploadPreviewWithContext = <
           action={() => {
             uploadFile({ newFile: item });
           }}
-          active={item.state !== FileState.UPLOADED && item.state !== FileState.FINISHED}
           style={styles.overlay}
           type={indicatorType}
         >
@@ -145,14 +189,18 @@ const FileUploadPreviewWithContext = <
                         24 - // 24 = close icon size
                         24, // 24 = internal padding
                     },
+                    I18nManager.isRTL ? { writingDirection: 'rtl' } : { writingDirection: 'ltr' },
                     filenameText,
                   ]}
                 >
                   {item.file.name || ''}
                 </Text>
-                <Text style={[styles.fileSizeText, { color: grey }, fileSizeText]}>
-                  {getFileSizeDisplayText(item.file.size)}
-                </Text>
+                {indicatorType !== null && (
+                  <UnsupportedFileTypeOrFileSizeIndicator
+                    indicatorType={indicatorType}
+                    item={item}
+                  />
+                )}
               </View>
             </View>
           </View>
@@ -235,6 +283,7 @@ export const FileUploadPreview = <
   props: FileUploadPreviewProps<StreamChatGenerics>,
 ) => {
   const { fileUploads, removeFile, uploadFile } = useMessageInputContext<StreamChatGenerics>();
+
   const { FileAttachmentIcon } = useMessagesContext<StreamChatGenerics>();
 
   return (

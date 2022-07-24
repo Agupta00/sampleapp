@@ -171,7 +171,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
   const { setData: setBottomSheetOverlayData } = useBottomSheetOverlayContext();
   const { setData: setUserInfoOverlayData } = useUserInfoOverlayContext();
   const navigation = useNavigation<GroupChannelDetailsScreenNavigationProp>();
-  const { setBlurType, setOverlay } = useOverlayContext();
+  const { setOverlay } = useOverlayContext();
   const {
     theme: {
       colors: { accent_blue, accent_green, black, border, grey, white, white_smoke },
@@ -399,8 +399,6 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     if (chatClient?.user?.id) {
       await channel.removeMembers([chatClient?.user?.id]);
     }
-
-    // setBlurType(undefined);
     setAppOverlay('none');
     setOverlay('none');
 

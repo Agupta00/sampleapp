@@ -29,6 +29,7 @@
   "Ok": "確認",
   "Photo": "写真",
   "Photos": "写真",
+  "Photos and Videos": "写真と動画",
   "Pin to Conversation": "会話にピンする",
   "Please enable access to your photos and videos so you can share them.": "写真やビデオへのアクセスを有効にして、共有できるようにしてください。",
   "Please select a channel first": "最初にチャンネルを選択してください",
@@ -46,6 +47,7 @@
   "Unmute User": "ユーザーのミュートを解除する",
   "Unpin from Conversation": "会話のピンを外す",
   "Unread Messages": "未読メッセージ",
+  "Video": "ビデオ",
   "You": "あなた",
   "{{ firstUser }} and {{ nonSelfUserLength }} more are typing": "{{ firstUser }}と{{ nonSelfUserLength }}人がタイピングしています",
   "{{ index }} of {{ photoLength }}": "{{ index }} / {{ photoLength }}",
@@ -63,5 +65,7 @@
   "Only visible to you": "あなただけに見える",
   "Reply": "返事",
   "Reply to Message": "メッセージに返信",
-  "🏙 Attachment...": "🏙 アタッチメント..."
+  "🏙 Attachment...": "🏙 アタッチメント...",
+  "Not supported": "サポートしていません",
+  "File type not supported": "サポートされていないファイルです"
 }
