@@ -1,5 +1,5 @@
+const localhost = '192.168.30.102';
 export const fetchPost = (url_: string, data: Record<any, any>) => {
-  const localhost = '0.0.0.0';
   const url = `http://${localhost}${url_}`;
   console.log(`[fetchPost] fetting url ${url}`);
   return new Promise((resolve, reject) => {
