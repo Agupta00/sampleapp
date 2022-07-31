@@ -38,6 +38,13 @@ export type StackNavigatorParamList = {
   ChannelImagesScreen: {
     channel: Channel<StreamChatGenerics>;
   };
+  TagPlayerScreen: {
+    channel: Channel<StreamChatGenerics>;
+    gameId: string;
+    requestUserName: string;
+    userDetailsState;
+    setUserDetailsState;
+  };
   ChannelListScreen: undefined;
   ChannelPinnedMessagesScreen: {
     channel: Channel<StreamChatGenerics>;

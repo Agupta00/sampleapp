@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ScrollView,
@@ -10,7 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { PrivateValueStore, RouteProp, useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Avatar,
@@ -19,7 +17,6 @@ import {
   useTheme,
 } from 'stream-chat-react-native';
 
-// import { AsyncStorage } from '../utils/AsyncStore';
 import AsyncStorage from '../utils/AsyncStore';
 import { fetchPost } from '../utils/fetch';
 
@@ -47,8 +44,9 @@ import type { Channel, UserResponse } from 'stream-chat';
 import type { StackNavigatorParamList, StreamChatGenerics } from '../types';
 import { Pin } from '../icons/Pin';
 
-//Don't need this anymore
-const FETCH_STALE_TIME_SECONDS = 300000000000;
+const DEBUG = true;
+// 1 min
+const FETCH_STALE_TIME_SECONDS = 60 * 1;
 
 const styles = StyleSheet.create({
   actionContainer: {
@@ -190,14 +188,15 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
   const membersStatus = useChannelMembersStatus(channel);
   const displayName = useChannelPreviewDisplayName<StreamChatGenerics>(channel, 30);
   const gameId = channel.id ? channel.id : '';
+  //TODO p1: fix this
+  // console.error('No channel.id thus no gameId');
 
-  //TODO A better solution would be to have the backend tell us when we can re-start the game.
-
+  //TODO: (Push notifications): A better solution would be to have the backend tell us when we can re-start the game.
   const [userDetailsState, setUserDetailsState] = useState({
     // gameStarted: false, //for development
     dataLoaded: false,
     gameStarted: true, //Start of as true since we don't want the user to be able to create a game until we are sure they should be able to.
-    targetPlayers: [],
+    targetPlayersStatus: [],
     lastFetchedMillis: -1,
   });
 
@@ -210,9 +209,8 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
       const timeElapsedSeconds =
         millisToSec(performance.now()) - millisToSec(storedUserDetails.lastFetchedMillis);
 
-      console.log('storedUserDetails', storedUserDetails);
       if (
-        userDetailsState.targetPlayers.length !== 0 &&
+        storedUserDetails.targetPlayersStatus.length !== 0 &&
         timeElapsedSeconds < FETCH_STALE_TIME_SECONDS
       ) {
         setUserDetailsState({ dataLoaded: true, ...storedUserDetails });
@@ -230,7 +228,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
           console.log('getuserdetails res()', res, typeof res);
           const newUserDetails = {
             gameStarted: res.gameStarted,
-            targetPlayers: res.targetPlayers,
+            targetPlayersStatus: res.targetPlayersStatus,
             lastFetchedMillis: performance.now(),
           };
           setUserDetailsState({ dataLoaded: true, ...newUserDetails });
@@ -254,44 +252,6 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
 
   const channelCreatorId =
     channel.data && (channel.data.created_by_id || (channel.data.created_by as UserResponse)?.id);
-
-  const hitPlayer = async () => {
-    //TODO catch failure
-    const res: any = await fetchPost(':5001/game-7bb7c/us-central1/requestHitPlayerEmpty', {
-      gameId,
-      requestUserName: chatClient?.user?.id,
-    });
-
-    console.log('GroupChannelDetailsScreen@hitPlayer');
-    console.log('hitplayer res', res);
-
-    setUserDetailsState((prevState) => ({
-      ...prevState,
-      lastFetchedMillis: performance.now(),
-      targetPlayers: res.newTargetUsers,
-    }));
-
-    AsyncStorage.setItem(gameId, {
-      gameStarted: true,
-      lastFetchedMillis: performance.now(),
-      targetPlayers: res.newTargetUsers,
-    });
-
-    setAppOverlay('none');
-    setOverlay('none');
-  };
-
-  const openHitPlayerConfirmationSheet = () => {
-    if (chatClient?.user?.id) {
-      setBottomSheetOverlayData({
-        confirmText: 'Tag',
-        onConfirm: hitPlayer,
-        subtext: `Please be fair! This can not be undone.`,
-        title: 'Tag Opponent',
-      });
-      setAppOverlay('confirmation');
-    }
-  };
 
   const openStartGameConfirmationSheet = () => {
     if (chatClient?.user?.id) {
@@ -375,7 +335,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     AsyncStorage.setItem(gameId, {
       gameStarted: true,
       lastFetchedMillis: -1,
-      targetPlayers: [],
+      targetPlayersStatus: [],
     });
 
     setAppOverlay('none');
@@ -621,6 +581,44 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
               <GoForward height={24} width={24} />
             </View>
           </TouchableOpacity>
+          {userDetailsState.gameStarted && userDetailsState.targetPlayersStatus.length !== 0 && (
+            <TouchableOpacity
+              onPress={() => {
+                const requestUserName: any = chatClient?.user?.id;
+                navigation.navigate('TagPlayerScreen', {
+                  channel,
+                  gameId,
+                  requestUserName,
+                  userDetailsState,
+                  setUserDetailsState,
+                });
+              }}
+              style={[
+                styles.actionContainer,
+                {
+                  borderBottomColor: border,
+                },
+              ]}
+            >
+              <View style={styles.actionLabelContainer}>
+                <Pin fill={grey} />
+                <Text
+                  style={[
+                    styles.itemText,
+                    {
+                      color: black,
+                    },
+                  ]}
+                >
+                  Tag {userDetailsState.targetPlayersStatus[0].player}
+                  {userDetailsState.targetPlayersStatus[0].status === 'pending' ? ' (pending)' : ''}
+                </Text>
+              </View>
+              <View>
+                <GoForward height={24} width={24} />
+              </View>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() => {
               navigation.navigate('ChannelImagesScreen', {
@@ -734,7 +732,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
           {
             /* Moderator options */
             // TODO more correct logic here.
-            channelCreatorId === chatClient?.user?.id && (
+            (channelCreatorId === chatClient?.user?.id || DEBUG) && (
               <TouchableOpacity
                 //TODO change color when not possible to start game
                 // disabled={userDetailsState.gameStarted}
@@ -759,36 +757,6 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
                     ]}
                   >
                     Start Game
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            )
-          }
-          {
-            /* Hit Player */
-            userDetailsState.gameStarted && userDetailsState.targetPlayers.length !== 0 && (
-              <TouchableOpacity
-                // disabled={userDetailsState.targetPlayers[0] === 'pending'}
-                onPress={openHitPlayerConfirmationSheet}
-                style={[
-                  styles.actionContainer,
-                  {
-                    borderBottomColor: border,
-                  },
-                ]}
-              >
-                <View style={styles.actionLabelContainer}>
-                  <RemoveUser height={24} width={24} />
-                  <Text
-                    style={[
-                      styles.itemText,
-                      {
-                        color: black,
-                      },
-                    ]}
-                  >
-                    {/* TODO this is only for the single target case. */}
-                    Tag {userDetailsState.targetPlayers[0]}
                   </Text>
                 </View>
               </TouchableOpacity>

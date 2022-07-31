@@ -15,6 +15,7 @@ import { useStreamChatTheme } from './src/hooks/useStreamChatTheme';
 import { AdvancedUserSelectorScreen } from './src/screens/AdvancedUserSelectorScreen';
 import { ChannelFilesScreen } from './src/screens/ChannelFilesScreen';
 import { ChannelImagesScreen } from './src/screens/ChannelImagesScreen';
+import { TagPlayerScreen } from './src/screens/TagPlayerScreen';
 import { ChannelScreen } from './src/screens/ChannelScreen';
 import { ChannelPinnedMessagesScreen } from './src/screens/ChannelPinnedMessagesScreen';
 import { ChatScreen } from './src/screens/ChatScreen';
@@ -302,6 +303,11 @@ const HomeScreen = () => {
       <Stack.Screen
         component={ChannelImagesScreen}
         name='ChannelImagesScreen'
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        component={TagPlayerScreen}
+        name='TagPlayerScreen'
         options={{ headerShown: false }}
       />
       <Stack.Screen
