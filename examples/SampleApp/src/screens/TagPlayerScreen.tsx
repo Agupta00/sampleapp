@@ -1,19 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { SendMessageAPIResponse } from 'stream-chat';
 import {
   AttachButton,
   Channel,
   FileUpload,
+  // HitButton,
   InputButtons,
   MessageInput,
+  MessageStatusTypes,
   useTheme,
 } from 'stream-chat-react-native';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { usePaginatedPinnedMessages } from '../hooks/usePaginatedPinnedMessages';
 import { Message } from '../icons/Message';
 import { MessageSearchList } from '../components/MessageSearch/MessageSearchList';
 import { ScreenHeader } from '../components/ScreenHeader';
+// import { SendButton } from '../components/HitPlayerButton';
 
 import { StreamChatGenerics } from '../types';
 import { useChannelContext, useMessageInputContext } from 'stream-chat-react-native';
@@ -21,6 +24,9 @@ import { useChannelContext, useMessageInputContext } from 'stream-chat-react-nat
 import type { RouteProp } from '@react-navigation/native';
 
 import type { StackNavigatorParamList } from '../types';
+
+import AsyncStorage from '../utils/AsyncStore';
+import { fetchPost } from '../utils/fetch';
 
 // const styles = StyleSheet.create({
 //   container: {
@@ -34,22 +40,8 @@ import type { StackNavigatorParamList } from '../types';
 //     flex: 1,
 //     paddingLeft: 16,
 //   },
-//   emptyContainer: {
-//     alignItems: 'center',
-//     flex: 1,
-//     justifyContent: 'center',
-//     paddingHorizontal: 40,
-//   },
 //   flex: {
 //     flex: 1,
-//   },
-//   noFiles: {
-//     fontSize: 16,
-//     paddingBottom: 8,
-//   },
-//   noFilesDetails: {
-//     fontSize: 14,
-//     textAlign: 'center',
 //   },
 //   sectionContainer: {
 //     paddingBottom: 8,
@@ -71,6 +63,7 @@ import type { StackNavigatorParamList } from '../types';
 //     paddingBottom: 2,
 //   },
 // });
+
 const styles = StyleSheet.create({
   actionContainer: {
     alignItems: 'center',
@@ -154,65 +147,129 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
+  emptyContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 40,
+  },
+  noFilesDetails: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  noFiles: {
+    fontSize: 16,
+    paddingBottom: 8,
+  },
 });
 
-type ChannelPinnedMessagesScreenRouteProp = RouteProp<
-  StackNavigatorParamList,
-  'ChannelFilesScreen'
->;
+type ChannelTagPlayerScreenRouteProp = RouteProp<StackNavigatorParamList, 'TagPlayerScreen'>;
 
-export type ChannelPinnedMessagesScreenProps = {
-  route: ChannelPinnedMessagesScreenRouteProp;
+export type ChannelTagPlayerScreenProps = {
+  route: ChannelTagPlayerScreenRouteProp;
 };
 
-export const TagPlayerScreen: React.FC<ChannelPinnedMessagesScreenProps> = ({
+export const TagPlayerScreen: React.FC<ChannelTagPlayerScreenProps> = ({
   route: {
-    params: { channel },
+    params: { channel, gameId, requestUserName, setUserDetailsState, userDetailsState },
   },
 }) => {
+  const [sentHitPlayerRequest, setSentHitPlayerRequest] = useState(false);
+  console.log('userdetailsstate', userDetailsState);
+
+  const hitPlayer = async (messageObject: Record<any, any>) => {
+    //TODO catch failure
+    const res: any = await fetchPost(':5001/game-7bb7c/us-central1/requestHitPlayerEmpty', {
+      gameId,
+      requestUserName,
+      messageObject,
+    });
+
+    console.log('GroupChannelDetailsScreen@hitPlayer');
+    console.log('hitplayer res', res);
+
+    //TODO: can clean this up somehow
+    setUserDetailsState((prevState) => ({
+      ...prevState,
+      lastFetchedMillis: performance.now(),
+      targetPlayersStatus: res.targetPlayersStatus,
+    }));
+
+    AsyncStorage.setItem(gameId, {
+      gameStarted: true,
+      lastFetchedMillis: performance.now(),
+      targetPlayersStatus: res.targetPlayersStatus,
+    });
+
+    setSentHitPlayerRequest(true);
+  };
+
   const {
     theme: {
       colors: { accent_blue, accent_green, black, border, grey, white, white_smoke, white_snow },
     },
   } = useTheme();
-  const { loading, loadMore, messages } = usePaginatedPinnedMessages(channel);
   const insets = useSafeAreaInsets();
 
+  const EmptyTagPlayer = () => {
+    const {
+      theme: {
+        colors: { black, grey, grey_gainsboro },
+      },
+    } = useTheme();
+    return (
+      <View style={styles.emptyContainer}>
+        <Message fill={grey_gainsboro} height={110} width={130} />
+        {sentHitPlayerRequest && <Text style={[styles.noFiles, { color: black }]}>Thanks</Text>}
+        <Text style={[styles.noFilesDetails, { color: grey }]}>
+          Pending Confirmation from {userDetailsState.targetPlayersStatus[0].player}
+        </Text>
+      </View>
+    );
+  };
+
   const Temp = () => {
-    // const channel_ = useChannelContext<StreamChatGenerics>().channel;
-    // const { toggleAttachmentPicker } = useMessageInputContext<StreamChatGenerics>();
-    // return <AttachButton handleOnPress={toggleAttachmentPicker} />;
     const { fileUploads } = useMessageInputContext();
     const hasOneVideo = fileUploads.find((file: FileUpload) =>
       file.file.type?.startsWith('video/'),
     );
-    return (
-      <>
-        <View style={styles.actionLabelContainer}>
-          <Text
-            style={[
-              styles.itemText,
-              {
-                color: black,
-              },
-            ]}
-          >
-            Uploading a video of your target being tagged to mark them as out.
-          </Text>
-        </View>
-        <MessageInput
-          disabled={!hasOneVideo}
-          InputButtons={() => <InputButtons hasCommands={false} hasFilePicker={false} />}
-          // SendButton={} //WAKE UP HERE : call backend with video of you being hit.
-          //i think if we can change value.sendMessage() would be super easy to do this.
-          //defintion here
-          //export const useCreateInputMessageInputContext = <
-          // StreamChatGenerics extends DefaultStreamChatGenerics = DefaultStreamChatGenerics,
-          // >({
-        />
-      </>
-    );
+
+    if (!sentHitPlayerRequest && userDetailsState.targetPlayersStatus[0].status !== 'pending') {
+      return (
+        <>
+          <View style={styles.actionLabelContainer}>
+            <Text
+              style={[
+                styles.itemText,
+                {
+                  color: black,
+                },
+              ]}
+            >
+              Upload a video of your target being tagged to mark them as out.
+            </Text>
+          </View>
+          <MessageInput
+            disabled={!hasOneVideo}
+            InputButtons={() => <InputButtons hasCommands={false} hasFilePicker={false} />}
+            // SendButton={HitButton}
+          />
+        </>
+      );
+    } else {
+      return EmptyTagPlayer();
+    }
   };
+
+  // Called when the user clicks the sendbutton in the MessageInput component which is used to send
+  // a video of their target being eliminated.
+  // This logic is added here to avoid creating a new SendButton component.
+  const doSendMessageRequest = (channelId, messageObject) => {
+    hitPlayer(messageObject);
+    //TODO don't show the whole channel the hit video.
+    return channel.sendMessage({ ...messageObject, text: 'game update' });
+  };
+
   return (
     <View
       style={[
@@ -224,33 +281,9 @@ export const TagPlayerScreen: React.FC<ChannelPinnedMessagesScreenProps> = ({
       ]}
     >
       <ScreenHeader titleText='Tag Player' />
-      {/* <MessageSearchList
-        EmptySearchIndicator={EmptyListComponent}
-        loading={loading}
-        loadMore={loadMore}
-        messages={messages}
-      /> */}
-      {/** Create a channel with the bot whom gets the proof videos */}
-      <Channel channel={channel}>
+      <Channel channel={channel} doSendMessageRequest={doSendMessageRequest}>
         <Temp />
       </Channel>
     </View>
   );
 };
-
-// const EmptyListComponent = () => {
-//   const {
-//     theme: {
-//       colors: { black, grey, grey_gainsboro },
-//     },
-//   } = useTheme();
-//   return (
-//     <View style={styles.emptyContainer}>
-//       <Message fill={grey_gainsboro} height={110} width={130} />
-//       <Text style={[styles.noFiles, { color: black }]}>No pinned messages</Text>
-//       <Text style={[styles.noFilesDetails, { color: grey }]}>
-//         Long-press an important message and choose Pin to conversation.
-//       </Text>
-//     </View>
-//   );
-// };
