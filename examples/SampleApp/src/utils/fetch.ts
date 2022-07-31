@@ -1,4 +1,4 @@
-const localhost = '192.168.30.102';
+const localhost = '192.168.30.104';
 export const fetchPost = (url_: string, data: Record<any, any>) => {
   const url = `http://${localhost}${url_}`;
   console.log(`[fetchPost] fetting url ${url}`);
