@@ -30,7 +30,9 @@ import { AttachmentActions, AttachmentActionsProps } from 'stream-chat-react-nat
 
 import { fetchPost } from '../utils/fetch';
 
-const TestAttachment: React.ComponentType<AttachmentActionsProps<StreamChatGenerics>> = (props) => {
+const CustomAttachmentActions: React.ComponentType<AttachmentActionsProps<StreamChatGenerics>> = (
+  props,
+) => {
   const handleAction = async (name: string, value: string) => {
     console.log(`handle action ${name}, ${value}`);
     switch (name) {
@@ -168,7 +170,7 @@ export const ChannelScreen: React.FC<ChannelScreenProps> = ({
   return (
     <View style={[styles.flex, { backgroundColor: white, paddingBottom: bottom }]}>
       <Channel
-        AttachmentActions={TestAttachment}
+        AttachmentActions={CustomAttachmentActions}
         channel={channel}
         disableTypingIndicator
         enforceUniqueReaction
