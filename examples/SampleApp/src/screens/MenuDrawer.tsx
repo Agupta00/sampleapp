@@ -75,7 +75,7 @@ export const MenuDrawer: React.FC<DrawerContentComponentProps> = ({ navigation }
         </Text>
       </View>
       <View style={styles.menuContainer}>
-        <View>
+        {/* <View>
           <TouchableOpacity
             onPress={() => navigation.navigate('NewDirectMessagingScreen')}
             style={styles.menuItem}
@@ -108,7 +108,7 @@ export const MenuDrawer: React.FC<DrawerContentComponentProps> = ({ navigation }
               New Group
             </Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
         <TouchableOpacity
           onPress={() => {
             logout();
