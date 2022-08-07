@@ -188,8 +188,9 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
   const membersStatus = useChannelMembersStatus(channel);
   const displayName = useChannelPreviewDisplayName<StreamChatGenerics>(channel, 30);
   const gameId = channel.id ? channel.id : '';
-  //TODO p1: fix this
-  // console.error('No channel.id thus no gameId');
+  if (!gameId) {
+    throw new Error(`no gameId bc channel.id ${gameId}`);
+  }
 
   //TODO: (Push notifications): A better solution would be to have the backend tell us when we can re-start the game.
   const [userDetailsState, setUserDetailsState] = useState({
@@ -340,9 +341,6 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
 
     setAppOverlay('none');
     setOverlay('none');
-
-    //Don't navigate back since we can't update gameStartedState.
-    //TODO should set such data somehwere else.
 
     //There shouldn't be a case where we don't have anything to go back to.
     // if (!navigation.canGoBack()) {
