@@ -129,7 +129,7 @@ const LoginScreen: React.FC<ILoginScreenProps> = ({
 
   const onLogin = async () => {
     if (!phone || !password) {
-      showErrorMsg('Invalid form');
+      showErrorMsg('Fill all fields');
     }
 
     await fetchPost(`:5001/game-7bb7c/us-central1/login`, {
