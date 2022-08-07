@@ -9,6 +9,8 @@ import Animated, {
 
 import { OverlayBackdrop } from 'stream-chat-react-native';
 
+import { LoadingScreenFull } from '../screens/LoadingScreenFull';
+
 import { AppOverlayContext, AppOverlayContextValue } from './AppOverlayContext';
 
 import { BottomSheetOverlay } from '../components/BottomSheetOverlay';
@@ -88,6 +90,7 @@ export const AppOverlayProvider: React.FC<{
           </UserInfoOverlayProvider>
         </ChannelInfoOverlayProvider>
       </BottomSheetOverlayProvider>
+      {/* {overlay === 'loading' && <LoadingScreenFull />} */}
     </AppOverlayContext.Provider>
   );
 };

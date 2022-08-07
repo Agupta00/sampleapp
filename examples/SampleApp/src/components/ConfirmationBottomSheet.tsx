@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
 });
 
 export const ConfirmationBottomSheet: React.FC = () => {
-  const { setOverlay } = useAppOverlayContext();
+  const { overlay, setOverlay } = useAppOverlayContext();
   const { data: contextData, reset } = useBottomSheetOverlayContext();
   const data = contextData && !isAddMemberBottomSheetData(contextData) ? contextData : undefined;
 
@@ -63,6 +63,20 @@ export const ConfirmationBottomSheet: React.FC = () => {
   }
 
   const { cancelText = 'CANCEL', confirmText = 'CONFIRM', onConfirm, subtext, title } = data;
+
+  //Unused for now
+  // const specializedOnConfirm = async () => {
+  //   if (confirmText === 'Start') {
+  //     const previousOverlay = overlay;
+  //     console.log(`previous ${previousOverlay}`);
+  //     setOverlay('loading');
+  //     await onConfirm();
+  //     setOverlay(previousOverlay);
+  //     setOverlay('none');
+  //   } else {
+  //     onConfirm();
+  //   }
+  // };
 
   return (
     <View
