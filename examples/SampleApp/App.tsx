@@ -201,7 +201,7 @@ const UserSelector = () => (
 
 const LoginStack = createStackNavigator();
 const LoginSelector = () => (
-  <LoginStack.Navigator initialRouteName='SignUpScreen' screenOptions={{ animationEnabled: false }}>
+  <LoginStack.Navigator initialRouteName='LoginScreen' screenOptions={{ animationEnabled: false }}>
     <LoginStack.Screen
       component={LoginScreen}
       name='LoginScreen'
