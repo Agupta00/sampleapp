@@ -39,7 +39,7 @@ const CustomAttachmentActions: React.ComponentType<AttachmentActionsProps<Stream
       case 'confirm':
       case 'deny':
       case 'dispute': {
-        await fetchPost(`:5001/game-7bb7c/us-central1/handleMessageAction`, {
+        await fetchPost(`handleMessageAction`, {
           actionValue: value,
         });
         //TODO handle failure cases

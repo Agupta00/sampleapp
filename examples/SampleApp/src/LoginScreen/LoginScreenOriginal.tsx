@@ -145,7 +145,7 @@ export interface ILoginScreenProps {
 //     //   formError();
 //     // }
 
-//     await fetchPost('http://localhost:5001/game-7bb7c/us-central1/createUser', {
+//     await fetchPost('http://localhostcreateUser', {
 //       phone,
 //       password,
 //       username,

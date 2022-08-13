@@ -44,7 +44,8 @@ import type { Channel, UserResponse } from 'stream-chat';
 import type { StackNavigatorParamList, StreamChatGenerics } from '../types';
 import { Pin } from '../icons/Pin';
 
-const DEBUG = true;
+const DEBUG = __DEV__;
+
 // 1 min
 const FETCH_STALE_TIME_SECONDS = 60 * 1;
 
@@ -221,7 +222,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
 
     // If we haven't checked yet, or it has been some time since we last checked.
     if (needsFetch) {
-      await fetchPost(`:5001/game-7bb7c/us-central1/userDetails`, {
+      await fetchPost(`userDetails`, {
         gameId,
         requestUserName: chatClient?.user?.id,
       })
@@ -317,7 +318,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     //Admin can't play
     // const playerNames = memberNames.filter((userId) => userId !== channelCreatorId);
     const playerNames = memberNames;
-    const res = await fetchPost(':5001/game-7bb7c/us-central1/createGame', {
+    const res = await fetchPost('createGame', {
       moderatorUserId: chatClient?.user?.id,
       playerNames,
       gameId,

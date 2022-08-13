@@ -152,7 +152,7 @@ const SignUpScreen: React.FC<ILoginScreenProps> = ({
     //   formError();
     // }
 
-    await fetchPost(`:5001/game-7bb7c/us-central1/createUser`, {
+    await fetchPost(`createUser`, {
       phone,
       password,
       username,
@@ -277,7 +277,7 @@ const SignUpScreenC: React.FC<Props> = ({ navigation }) => {
       disableSocialButtons={true}
       emailPlaceholder={'Phone'}
       loginButtonStyle={{ backgroundColor: '#453837' }}
-      logoImageSource={require('../icons/statue.png')}
+      logoImageSource={require('../icons/logo.jpeg')}
       logoImageStyle={{ width: 300, height: 300 }}
       navigation={navigation}
       onEmailChange={(email: string) => {}}
