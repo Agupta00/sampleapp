@@ -184,6 +184,7 @@ const DrawerNavigatorWrapper: React.FC<{
   );
 };
 
+//TOOD: easy remove this?
 const UserSelector = () => (
   <UserSelectorStack.Navigator initialRouteName='UserSelectorScreen'>
     <UserSelectorStack.Screen
@@ -213,42 +214,6 @@ const LoginSelector = () => (
       options={{ gestureEnabled: false, headerShown: false }}
     />
   </LoginStack.Navigator>
-);
-
-type Props = {
-  // navigation: UserSelectorScreenNavigationProp;
-};
-
-// const signUpScreen: React.FC<Props> = ({ navigation }) => (
-//   <SignUpScreen
-//     disableSocialButtons={true}
-//     emailPlaceholder={'Phone'}
-//     loginButtonStyle={{ backgroundColor: '#453837' }}
-//     logoImageSource={require('./src/icons/statue.png')}
-//     logoImageStyle={{ width: 300, height: 300 }}
-//     onEmailChange={(email: string) => {}}
-//     onLoginPress={(data) => {
-//       console.log(data);
-//     }}
-//     onPasswordChange={(password: string) => {}}
-//     onSignupPress={() => {}}
-//     // passwordPlaceholer={`Pass`}
-//   />
-// );
-
-const loginScreen: React.FC<Props> = ({ navigation }) => (
-  <LoginScreen
-    disableSocialButtons={true}
-    emailPlaceholder={'Phone'}
-    loginButtonStyle={{ backgroundColor: '#453837' }}
-    logoImageSource={require('./src/icons/statue.png')}
-    logoImageStyle={{ width: 300, height: 300 }}
-    onEmailChange={(email: string) => {}}
-    onLoginPress={() => {}}
-    onPasswordChange={(password: string) => {}}
-    onSignupPress={() => {}}
-    // passwordPlaceholer={`Pass`}
-  />
 );
 
 // TODO: Split the stack into multiple stacks - ChannelStack, CreateChannelStack etc.
