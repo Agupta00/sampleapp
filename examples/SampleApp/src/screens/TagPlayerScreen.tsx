@@ -179,7 +179,7 @@ export const TagPlayerScreen: React.FC<ChannelTagPlayerScreenProps> = ({
 
   const hitPlayer = async (messageObject: Record<any, any>) => {
     //TODO catch failure
-    const res: any = await fetchPost(':5001/game-7bb7c/us-central1/requestHitPlayerEmpty', {
+    const res: any = await fetchPost('requestHitPlayerEmpty', {
       gameId,
       requestUserName,
       messageObject,
@@ -229,11 +229,12 @@ export const TagPlayerScreen: React.FC<ChannelTagPlayerScreenProps> = ({
   };
 
   const Temp = () => {
-    const { fileUploads } = useMessageInputContext();
-    const hasOneVideo = fileUploads.find((file: FileUpload) =>
-      file.file.type?.startsWith('video/'),
-    );
-
+    const { fileUploads, imageUploads } = useMessageInputContext();
+    // const hasOneVideo = fileUploads.find((file: FileUpload) =>
+    //   file.file.type?.startsWith('video/'),
+    // );
+    // console.log(fileUploads);
+    const hasAttachment = fileUploads.length > 0 || imageUploads.length > 0;
     if (!sentHitPlayerRequest && userDetailsState.targetPlayersStatus[0].status !== 'pending') {
       return (
         <>
@@ -250,7 +251,7 @@ export const TagPlayerScreen: React.FC<ChannelTagPlayerScreenProps> = ({
             </Text>
           </View>
           <MessageInput
-            disabled={!hasOneVideo}
+            disabled={!hasAttachment}
             InputButtons={() => <InputButtons hasCommands={false} hasFilePicker={false} />}
             // SendButton={HitButton}
           />
