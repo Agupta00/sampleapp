@@ -1,11 +1,12 @@
-  
-git_url("https://github.com/GetStream/ios-certificates")
+
+git_url("https://github.com/Agupta00/ios-certificates")
 
 storage_mode("git")
 
-username("vishal@getstream.io")
+username("akulgupta2000@gmail.com")
 
-team_id("EHV7XZLAHA")
+# should this be MM528P4T78
+team_id("6NHUAG2PT6")
 
 # app_identifier(["tools.fastlane.app", "tools.fastlane.app2"])
 

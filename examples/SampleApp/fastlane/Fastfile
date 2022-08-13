@@ -27,7 +27,7 @@ lane :match_me do
   match(
     type: "adhoc",
     app_identifier: [
-        "io.getstream.reactnative.SampleApp",
+        "com.tagmegame.tag",
     ],
     readonly: true,
     force_for_new_devices: !is_ci
@@ -39,7 +39,7 @@ lane :match_appstore do
   match(
     type: "appstore",
     app_identifier: [
-        "io.getstream.reactnative.SampleApp",
+        "com.tagmegame.tag",
     ],
     readonly: is_ci
   )
@@ -73,13 +73,17 @@ end
 platform :ios do
   desc "Deploy build to TestFlight QA"
   lane :deploy_to_testflight_qa do
-      app_store_connect_api_key()
+      app_store_connect_api_key(
+        key_id: '42TWQN4TJ4',
+        issuer_id: '1d5a4717-4071-47d2-bd56-118b5afe21e1',
+        key_content:'-----BEGIN PRIVATE KEY-----\nMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgG6u0sxevlleCngZ7\ngMwcVS1gLfqzlD8rMJi6awg5Vo+gCgYIKoZIzj0DAQehRANCAAS8yEFGWjTMTb70\nKdy6qSFt9FHIIAmvzvnagIQE1rfQt9DIPIZw0L8Eki0lFe4McmQcSJBO6mwnTEil\nmjZeoPVU\n-----END PRIVATE KEY-----'
+      )
 
       match_appstore
 
       settings_to_override = {
-        :BUNDLE_IDENTIFIER => "io.getstream.reactnative.SampleApp",
-        :PROVISIONING_PROFILE_SPECIFIER => "match AppStore io.getstream.reactnative.SampleApp"
+        :BUNDLE_IDENTIFIER => "com.tagmegame.tag",
+        :PROVISIONING_PROFILE_SPECIFIER => "match AppStore com.tagmegame.tag"
       }
 
       package = load_json(json_path: "./package.json")
@@ -93,7 +97,7 @@ platform :ios do
           export_options: "./fastlane/testflight_gym_export_options.plist",
           silent: true,
           clean: true,
-          xcargs: settings_to_override,
+          # xcargs: settings_to_override,
           include_symbols: true,
           output_directory: "./dist",
       )

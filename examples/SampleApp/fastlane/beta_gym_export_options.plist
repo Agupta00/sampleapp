@@ -6,8 +6,8 @@
 	<string>Development</string>
 	<key>provisioningProfiles</key>
 	<dict>
-		<key>io.getstream.reactnative.SampleApp</key>
-		<string>match AdHoc io.getstream.reactnative.SampleApp</string>
+		<key>com.tagmegame.tag</key>
+		<string>match AdHoc com.tagmegame.tag</string>
     </dict>
 </dict>
 </plist>
