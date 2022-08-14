@@ -267,14 +267,11 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     }
   };
 
-  /**
-   * Opens confirmation sheet for leaving the group
-   */
   const openJoinGameConfirmationSheet = () => {
     if (chatClient?.user?.id) {
       setBottomSheetOverlayData({
         confirmText: 'Join',
-        onConfirm: () => leaveGroup,
+        onConfirm: () => {},
         subtext: `Are you sure you want to join the game ${groupName || ''}? The wager is $10. `,
         title: 'Join Game',
       });
@@ -310,12 +307,9 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
   };
 
   const startGame = async () => {
-    //TODO use player names from chat.
-    //TODO Handle case where game not able to be created.
-
-    // const playerNames = ['vishal', 'neil', 'ben', 'nick'];
+    //TODO: Handle case where game not able to be created.
     const memberNames = allMembers.map((m) => m.user?.id);
-    //Admin can't play
+    //TODO: Admin can't play
     // const playerNames = memberNames.filter((userId) => userId !== channelCreatorId);
     const playerNames = memberNames;
     const res = await fetchPost('createGame', {
@@ -702,7 +696,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
             </View>
           </TouchableOpacity>
 
-          {
+          {/* {
             /* JoinGame */
             <TouchableOpacity
               onPress={openJoinGameConfirmationSheet}
@@ -727,7 +721,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
                 </Text>
               </View>
             </TouchableOpacity>
-          }
+          } */}
           {
             /* Moderator options */
             // TODO more correct logic here.

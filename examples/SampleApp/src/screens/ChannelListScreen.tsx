@@ -12,6 +12,7 @@ import { usePaginatedSearchedMessages } from '../hooks/usePaginatedSearchedMessa
 import type { ChannelSort } from 'stream-chat';
 
 import type { StreamChatGenerics } from '../types';
+import { ChannelListEmptyIndicator } from '../components/ChannelListEmptyIndicator';
 
 const styles = StyleSheet.create({
   channelListContainer: {
@@ -182,6 +183,7 @@ export const ChannelListScreen: React.FC = () => {
                 }),
                 keyboardDismissMode: 'on-drag',
               }}
+              EmptyStateIndicator={ChannelListEmptyIndicator}
               filters={filters}
               HeaderNetworkDownIndicator={() => null}
               maxUnreadCount={99}
