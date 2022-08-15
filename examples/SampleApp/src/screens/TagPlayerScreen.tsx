@@ -228,13 +228,10 @@ export const TagPlayerScreen: React.FC<ChannelTagPlayerScreenProps> = ({
     );
   };
 
-  const Temp = () => {
+  const VideoUpload = () => {
     const { fileUploads, imageUploads } = useMessageInputContext();
-    // const hasOneVideo = fileUploads.find((file: FileUpload) =>
-    //   file.file.type?.startsWith('video/'),
-    // );
-    // console.log(fileUploads);
     const hasAttachment = fileUploads.length > 0 || imageUploads.length > 0;
+    const enableSend = hasAttachment || __DEV__;
     if (!sentHitPlayerRequest && userDetailsState.targetPlayersStatus[0].status !== 'pending') {
       return (
         <>
@@ -247,11 +244,11 @@ export const TagPlayerScreen: React.FC<ChannelTagPlayerScreenProps> = ({
                 },
               ]}
             >
-              Upload a video of your target being tagged to mark them as out.
+              Upload a video or picture of confirmation.
             </Text>
           </View>
           <MessageInput
-            disabled={!hasAttachment}
+            disabled={!enableSend}
             InputButtons={() => <InputButtons hasCommands={false} hasFilePicker={false} />}
             // SendButton={HitButton}
           />
@@ -283,7 +280,7 @@ export const TagPlayerScreen: React.FC<ChannelTagPlayerScreenProps> = ({
     >
       <ScreenHeader titleText='Tag Player' />
       <Channel channel={channel} doSendMessageRequest={doSendMessageRequest}>
-        <Temp />
+        <VideoUpload />
       </Channel>
     </View>
   );
