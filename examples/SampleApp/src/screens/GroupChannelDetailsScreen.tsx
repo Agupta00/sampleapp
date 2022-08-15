@@ -44,8 +44,6 @@ import type { Channel, UserResponse } from 'stream-chat';
 import type { StackNavigatorParamList, StreamChatGenerics } from '../types';
 import { Pin } from '../icons/Pin';
 
-const DEBUG = __DEV__;
-
 // 1 min
 const FETCH_STALE_TIME_SECONDS = 60 * 1;
 
@@ -696,39 +694,39 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
             </View>
           </TouchableOpacity>
 
-          {/* {
-            /* JoinGame */
-            <TouchableOpacity
-              onPress={openJoinGameConfirmationSheet}
-              style={[
-                styles.actionContainer,
-                {
-                  borderBottomColor: border,
-                },
-              ]}
-            >
-              <View style={styles.actionLabelContainer}>
-                <RemoveUser height={24} width={24} />
-                <Text
-                  style={[
-                    styles.itemText,
-                    {
-                      color: black,
-                    },
-                  ]}
-                >
-                  Join Game
-                </Text>
-              </View>
-            </TouchableOpacity>
-          } */}
+          {
+            // /* JoinGame */
+            // <TouchableOpacity
+            //   onPress={openJoinGameConfirmationSheet}
+            //   style={[
+            //     styles.actionContainer,
+            //     {
+            //       borderBottomColor: border,
+            //     },
+            //   ]}
+            // >
+            //   <View style={styles.actionLabelContainer}>
+            //     <RemoveUser height={24} width={24} />
+            //     <Text
+            //       style={[
+            //         styles.itemText,
+            //         {
+            //           color: black,
+            //         },
+            //       ]}
+            //     >
+            //       Join Game
+            //     </Text>
+            //   </View>
+            // </TouchableOpacity>
+          }
           {
             /* Moderator options */
-            // TODO more correct logic here.
-            (channelCreatorId === chatClient?.user?.id || DEBUG) && (
+            // TODO more correct logic here?
+            (channelCreatorId === chatClient?.user?.id || __DEV__) && (
               <TouchableOpacity
                 //TODO change color when not possible to start game
-                // disabled={userDetailsState.gameStarted}
+                disabled={!(!userDetailsState.gameStarted || __DEV__)}
                 onPress={openStartGameConfirmationSheet}
                 style={[
                   styles.actionContainer,
