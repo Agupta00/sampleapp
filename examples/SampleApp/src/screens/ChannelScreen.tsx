@@ -29,19 +29,36 @@ import { NetworkDownIndicator } from '../components/NetworkDownIndicator';
 import { AttachmentActions, AttachmentActionsProps } from 'stream-chat-react-native';
 
 import { fetchPost } from '../utils/fetch';
+import AsyncStore from '../utils/AsyncStore';
 
 const CustomAttachmentActions: React.ComponentType<AttachmentActionsProps<StreamChatGenerics>> = (
   props,
 ) => {
   const handleAction = async (name: string, value: string) => {
     console.log(`handle action ${name}, ${value}`);
+    const { messageId } = JSON.parse(value);
     switch (name) {
       case 'confirm':
       case 'deny':
       case 'dispute': {
+        const fetchPendingOrSent = await AsyncStore.getItem<string | null>(messageId, null);
+        if (fetchPendingOrSent) {
+          return;
+        }
+
+        await AsyncStore.setItem(messageId, 'pending');
         await fetchPost(`handleMessageAction`, {
           actionValue: value,
-        });
+        })
+          .then(async (r) => {
+            //If we got a valid response, don't send any more requests.
+            //TODO: only need to set the messageId here instead of the whole value.
+            await AsyncStore.setItem(messageId, 'done');
+          })
+          .catch(() => {
+            console.log('failed to get response for handleMessageAction endpoint');
+            AsyncStore.removeItem(messageId);
+          });
         //TODO handle failure cases
         return;
       }
