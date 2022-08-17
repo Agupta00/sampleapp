@@ -42,8 +42,8 @@ export type StackNavigatorParamList = {
     channel: Channel<StreamChatGenerics>;
     gameId: string;
     requestUserName: string;
+    updateUserState;
     userDetailsState;
-    setUserDetailsState;
   };
   ChannelListScreen: undefined;
   ChannelPinnedMessagesScreen: {

@@ -171,7 +171,7 @@ export type ChannelTagPlayerScreenProps = {
 
 export const TagPlayerScreen: React.FC<ChannelTagPlayerScreenProps> = ({
   route: {
-    params: { channel, gameId, requestUserName, setUserDetailsState, userDetailsState },
+    params: { channel, gameId, requestUserName, updateUserState, userDetailsState },
   },
 }) => {
   const [sentHitPlayerRequest, setSentHitPlayerRequest] = useState(false);
@@ -188,15 +188,7 @@ export const TagPlayerScreen: React.FC<ChannelTagPlayerScreenProps> = ({
     console.log('GroupChannelDetailsScreen@hitPlayer');
     console.log('hitplayer res', res);
 
-    //TODO: can clean this up somehow
-    setUserDetailsState((prevState) => ({
-      ...prevState,
-      lastFetchedMillis: performance.now(),
-      targetPlayersStatus: res.targetPlayersStatus,
-    }));
-
-    AsyncStorage.setItem(gameId, {
-      gameStarted: true,
+    updateUserState({
       lastFetchedMillis: performance.now(),
       targetPlayersStatus: res.targetPlayersStatus,
     });

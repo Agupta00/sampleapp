@@ -193,13 +193,19 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
 
   //TODO: (Push notifications): A better solution would be to have the backend tell us when we can re-start the game.
   const [userDetailsState, setUserDetailsState] = useState({
-    // gameStarted: false, //for development
     dataLoaded: false,
+    // joinedGame: false,
     gameStarted: true, //Start of as true since we don't want the user to be able to create a game until we are sure they should be able to.
     targetPlayersStatus: [],
     lastFetchedMillis: -1,
   });
 
+  const updateUserState = (newState: Record<any, any>) => {
+    setUserDetailsState((prevState) => ({ ...prevState, ...newState }));
+    AsyncStorage.updateObject(gameId, newState);
+  };
+
+  // TODO: we should init to the stored data if it exists then update to the fetch data...
   const getUserDetails = async () => {
     const millisToSec = (millis: number) => millis * 1e-3;
 
@@ -269,8 +275,8 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     if (chatClient?.user?.id) {
       setBottomSheetOverlayData({
         confirmText: 'Join',
-        onConfirm: () => {},
-        subtext: `Are you sure you want to join the game ${groupName || ''}? The wager is $10. `,
+        onConfirm: joinGame,
+        subtext: ``,
         title: 'Join Game',
       });
       setAppOverlay('confirmation');
@@ -304,6 +310,49 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     }
   };
 
+  const joinGame = async () => {
+    // const res = await fetchPost('joinGame', {
+    //   userId: chatClient?.user?.id,
+    //   gameId,
+    // });
+
+    // console.log('GroupChannelDetailsScreen@joinGame');
+    // console.log(res);
+
+    // setUserDetailsState((prevState) => ({
+    //   ...prevState,
+    //   joinedGame: true,
+    //   lastFetchedMillis: performance.now(),
+    // }));
+
+    // AsyncStorage.setItem(gameId, {
+    //   joinedGame: true,
+    //   gameStarted: false,
+    //   lastFetchedMillis: -1,
+    //   targetPlayersStatus: [],
+    // });
+
+    // {
+    //   // let updated = await AsyncStorage.updateObject('testasdfas', 'newkey', 3);
+    //   // console.log('updated ? ', updated);
+    //   // AsyncStorage.setItem('test1', { a: 3 });
+    //   // updated = await AsyncStorage.updateObject('test1', { newkey: 4, a: 1 });
+    //   // console.log('updated 2 ? ', updated);
+    //   // const result = await AsyncStorage.getItem('test1', 4);
+    //   // console.log('res', result);
+    // }
+
+    setAppOverlay('none');
+    setOverlay('none');
+
+    //There shouldn't be a case where we don't have anything to go back to.
+    // if (!navigation.canGoBack()) {
+    //   console.warn('nothing to go back to');
+    // } else {
+    //   navigation.goBack();
+    // }
+  };
+
   const startGame = async () => {
     //TODO: Handle case where game not able to be created.
     const memberNames = allMembers.map((m) => m.user?.id);
@@ -320,15 +369,9 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
     console.log(res);
 
     //TODO check for error case here
-    setUserDetailsState((prevState) => ({
-      ...prevState,
+    updateUserState({
       gameStarted: true,
       lastFetchedMillis: performance.now(),
-    }));
-
-    AsyncStorage.setItem(gameId, {
-      gameStarted: true,
-      lastFetchedMillis: -1,
       targetPlayersStatus: [],
     });
 
@@ -581,7 +624,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
                   gameId,
                   requestUserName,
                   userDetailsState,
-                  setUserDetailsState,
+                  updateUserState,
                 });
               }}
               style={[
@@ -695,30 +738,30 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
           </TouchableOpacity>
 
           {
-            // /* JoinGame */
-            // <TouchableOpacity
-            //   onPress={openJoinGameConfirmationSheet}
-            //   style={[
-            //     styles.actionContainer,
-            //     {
-            //       borderBottomColor: border,
-            //     },
-            //   ]}
-            // >
-            //   <View style={styles.actionLabelContainer}>
-            //     <RemoveUser height={24} width={24} />
-            //     <Text
-            //       style={[
-            //         styles.itemText,
-            //         {
-            //           color: black,
-            //         },
-            //       ]}
-            //     >
-            //       Join Game
-            //     </Text>
-            //   </View>
-            // </TouchableOpacity>
+            /* JoinGame */
+            <TouchableOpacity
+              onPress={openJoinGameConfirmationSheet}
+              style={[
+                styles.actionContainer,
+                {
+                  borderBottomColor: border,
+                },
+              ]}
+            >
+              <View style={styles.actionLabelContainer}>
+                <RemoveUser height={24} width={24} />
+                <Text
+                  style={[
+                    styles.itemText,
+                    {
+                      color: black,
+                    },
+                  ]}
+                >
+                  Join Game
+                </Text>
+              </View>
+            </TouchableOpacity>
           }
           {
             /* Moderator options */
