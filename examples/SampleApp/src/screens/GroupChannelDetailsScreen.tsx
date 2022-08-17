@@ -45,7 +45,7 @@ import type { StackNavigatorParamList, StreamChatGenerics } from '../types';
 import { Pin } from '../icons/Pin';
 
 // 1 min
-const FETCH_STALE_TIME_SECONDS = 60 * 1;
+const FETCH_STALE_TIME_SECONDS = 10 * 1;
 
 const styles = StyleSheet.create({
   actionContainer: {
@@ -738,7 +738,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
                 ]}
               >
                 <View style={styles.actionLabelContainer}>
-                  <RemoveUser height={24} width={24} />
+                  <GoForward height={24} width={24} />
                   <Text
                     style={[
                       styles.itemText,
