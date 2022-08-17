@@ -104,7 +104,9 @@ export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
     },
   } = useTheme();
 
-  const results = resultsProp || resultsContext;
+  const results = (resultsProp || resultsContext).filter(
+    (user) => !user.name?.includes('testid-@4183@-'),
+  );
   const resultsLength = results.length;
   useEffect(() => {
     const newSections: {
@@ -116,6 +118,7 @@ export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
 
     results.forEach((user) => {
       const initial = user.name?.slice(0, 1).toUpperCase();
+      console.log(user.name);
 
       if (!initial) return;
 
