@@ -516,7 +516,7 @@
 				CODE_SIGN_ENTITLEMENTS = SampleApp/SampleAppDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = MM528P4T78;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = SampleApp/Info.plist;
@@ -548,7 +548,7 @@
 				CODE_SIGN_ENTITLEMENTS = SampleApp/SampleAppRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = MM528P4T78;
 				ENABLE_BITCODE = YES;
 				INFOPLIST_FILE = SampleApp/Info.plist;
