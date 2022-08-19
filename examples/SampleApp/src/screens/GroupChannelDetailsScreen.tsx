@@ -12,6 +12,7 @@ import { RouteProp, useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Avatar,
+  ChannelMemberResponse,
   useChannelPreviewDisplayName,
   useOverlayContext,
   useTheme,
@@ -194,7 +195,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
   //TODO: (Push notifications): A better solution would be to have the backend tell us when we can re-start the game.
   const [userDetailsState, setUserDetailsState] = useState({
     dataLoaded: false,
-    // joinedGame: false,
+    joinedPlayers: {},
     gameStarted: true, //Start of as true since we don't want the user to be able to create a game until we are sure they should be able to.
     targetPlayersStatus: [],
     lastFetchedMillis: -1,
@@ -219,7 +220,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
         storedUserDetails.targetPlayersStatus.length !== 0 &&
         timeElapsedSeconds < FETCH_STALE_TIME_SECONDS
       ) {
-        setUserDetailsState({ dataLoaded: true, ...storedUserDetails });
+        setUserDetailsState((prev) => ({ ...prev, dataLoaded: true, ...storedUserDetails }));
         needsFetch = false;
       }
     }
@@ -233,12 +234,11 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
         .then((res: any) => {
           console.log('getuserdetails res()', res, typeof res);
           const newUserDetails = {
-            gameStarted: res.gameStarted,
-            targetPlayersStatus: res.targetPlayersStatus,
+            ...res,
             lastFetchedMillis: performance.now(),
           };
-          setUserDetailsState({ dataLoaded: true, ...newUserDetails });
-          AsyncStorage.setItem(gameId, newUserDetails);
+          setUserDetailsState((prev) => ({ ...prev, dataLoaded: true, ...newUserDetails }));
+          AsyncStorage.updateObject(gameId, newUserDetails);
         })
         .catch((err) => console.warn('getUserDetails()', err));
     }
@@ -311,57 +311,31 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
   };
 
   const joinGame = async () => {
-    // const res = await fetchPost('joinGame', {
-    //   userId: chatClient?.user?.id,
-    //   gameId,
-    // });
+    await fetchPost('joinGame', {
+      userId: chatClient?.user?.id,
+      gameId,
+    }).then((res: any) => {
+      console.log('joingame res()', res, typeof res);
+      const newUserDetails = {
+        ...res,
+        lastFetchedMillis: performance.now(),
+      };
+      updateUserState(newUserDetails);
+      console.log('update state', userDetailsState);
+    });
 
-    // console.log('GroupChannelDetailsScreen@joinGame');
-    // console.log(res);
-
-    // setUserDetailsState((prevState) => ({
-    //   ...prevState,
-    //   joinedGame: true,
-    //   lastFetchedMillis: performance.now(),
-    // }));
-
-    // AsyncStorage.setItem(gameId, {
-    //   joinedGame: true,
-    //   gameStarted: false,
-    //   lastFetchedMillis: -1,
-    //   targetPlayersStatus: [],
-    // });
-
-    // {
-    //   // let updated = await AsyncStorage.updateObject('testasdfas', 'newkey', 3);
-    //   // console.log('updated ? ', updated);
-    //   // AsyncStorage.setItem('test1', { a: 3 });
-    //   // updated = await AsyncStorage.updateObject('test1', { newkey: 4, a: 1 });
-    //   // console.log('updated 2 ? ', updated);
-    //   // const result = await AsyncStorage.getItem('test1', 4);
-    //   // console.log('res', result);
-    // }
+    console.log('GroupChannelDetailsScreen@joinGame');
+    // updateUserState({ joinedGame: true });
 
     setAppOverlay('none');
     setOverlay('none');
-
-    //There shouldn't be a case where we don't have anything to go back to.
-    // if (!navigation.canGoBack()) {
-    //   console.warn('nothing to go back to');
-    // } else {
-    //   navigation.goBack();
-    // }
   };
 
   const startGame = async () => {
     //TODO: Handle case where game not able to be created.
-    const memberNames = allMembers.map((m) => m.user?.id);
     //TODO: Admin can't play
-    // const playerNames = memberNames.filter((userId) => userId !== channelCreatorId);
-    const playerNames = memberNames;
     const res = await fetchPost('createGame', {
       moderatorUserId: chatClient?.user?.id,
-      playerNames,
       gameId,
     });
 
@@ -404,6 +378,18 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
         },
       ],
     });
+  };
+
+  const userJoinedGame = (userId: string | undefined) =>
+    userDetailsState.joinedPlayers[userId] ? true : false;
+
+  const userGameStatus = (member: ChannelMemberResponse<StreamChatGenerics>) => {
+    if (channelCreatorId === member.user?.id) {
+      return (userJoinedGame(member.user?.id) ? ' (joined game) ' : '') + 'moderator';
+    } else if (userJoinedGame(member.user?.id)) {
+      return 'joined game';
+    }
+    return '';
   };
 
   return (
@@ -459,9 +445,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
                   <Text style={{ color: grey }}>{getUserActivityStatus(member.user)}</Text>
                 </View>
               </View>
-              <Text style={{ color: grey }}>
-                {channelCreatorId === member.user?.id ? 'owner' : ''}
-              </Text>
+              <Text style={{ color: grey }}>{userGameStatus(member)}</Text>
             </TouchableOpacity>
           );
         })}
@@ -740,11 +724,13 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
           {
             /* JoinGame */
             <TouchableOpacity
+              disabled={userJoinedGame(chatClient?.user?.id)}
               onPress={openJoinGameConfirmationSheet}
               style={[
                 styles.actionContainer,
                 {
                   borderBottomColor: border,
+                  backgroundColor: userJoinedGame(chatClient?.user?.id) ? '#F5F4F4' : '',
                 },
               ]}
             >
