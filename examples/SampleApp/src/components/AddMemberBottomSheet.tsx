@@ -84,6 +84,7 @@ export const AddMemberBottomSheet: React.FC = () => {
 
   const [addMemberQueryInProgress, setAddMemberQueryInProgress] = useState(false);
   const [error, setError] = useState(false);
+  const filteredResults = results.filter((user) => !user.name?.includes('testid-@4183@-'));
 
   if (!channel) {
     return null;
@@ -180,7 +181,7 @@ export const AddMemberBottomSheet: React.FC = () => {
           loading={loadingResults}
           loadMore={loadMore}
           onPress={addMember}
-          results={results}
+          results={filteredResults}
           searchText={searchText}
         />
       </View>
