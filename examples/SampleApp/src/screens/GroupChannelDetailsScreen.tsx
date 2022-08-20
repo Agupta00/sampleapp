@@ -385,12 +385,15 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
 
   const userGameStatus = (member: ChannelMemberResponse<StreamChatGenerics>) => {
     if (channelCreatorId === member.user?.id) {
-      return (userJoinedGame(member.user?.id) ? ' (joined game) ' : '') + 'moderator';
+      return (userJoinedGame(member.user?.id) ? ' (joined) ' : '') + 'moderator';
     } else if (userJoinedGame(member.user?.id)) {
-      return 'joined game';
+      return 'joined';
     }
     return '';
   };
+
+  const startGameDisabled =
+    userDetailsState.gameStarted || Object.keys(userDetailsState.joinedPlayers).length < 3;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: white }]}>
@@ -724,7 +727,7 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
           {
             /* JoinGame */
             <TouchableOpacity
-              disabled={userJoinedGame(chatClient?.user?.id)}
+              disabled={userJoinedGame(chatClient?.user?.id) && !__DEV__}
               onPress={openJoinGameConfirmationSheet}
               style={[
                 styles.actionContainer,
@@ -751,18 +754,17 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
           }
           {
             /* Moderator options */
-            // TODO more correct logic here?
             (channelCreatorId === chatClient?.user?.id || __DEV__) && (
               <TouchableOpacity
                 //TODO change color when not possible to start game
-                disabled={!(!userDetailsState.gameStarted || __DEV__)}
+                disabled={startGameDisabled}
                 onPress={openStartGameConfirmationSheet}
                 style={[
                   styles.actionContainer,
                   {
                     borderBottomColor: border,
                     backgroundColor:
-                      userDetailsState.gameStarted && userDetailsState.dataLoaded ? '#F5F4F4' : '',
+                      startGameDisabled && userDetailsState.dataLoaded ? '#F5F4F4' : '',
                   },
                 ]}
               >
@@ -776,7 +778,10 @@ export const GroupChannelDetailsScreen: React.FC<GroupChannelDetailsProps> = ({
                       },
                     ]}
                   >
-                    Start Game
+                    {'Start Game' +
+                      (Object.keys(userDetailsState.joinedPlayers).length < 3
+                        ? ` (min 3 joined players needed)`
+                        : '')}
                   </Text>
                 </View>
               </TouchableOpacity>
