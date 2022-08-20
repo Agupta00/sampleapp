@@ -64,19 +64,17 @@ export const ConfirmationBottomSheet: React.FC = () => {
 
   const { cancelText = 'CANCEL', confirmText = 'CONFIRM', onConfirm, subtext, title } = data;
 
-  //Unused for now
-  // const specializedOnConfirm = async () => {
-  //   if (confirmText === 'Start') {
-  //     const previousOverlay = overlay;
-  //     console.log(`previous ${previousOverlay}`);
-  //     setOverlay('loading');
-  //     await onConfirm();
-  //     setOverlay(previousOverlay);
-  //     setOverlay('none');
-  //   } else {
-  //     onConfirm();
-  //   }
-  // };
+  const specializedOnConfirm = async () => {
+    if (confirmText === 'Start') {
+      // const previousOverlay = overlay;
+      setOverlay('loading');
+      await onConfirm();
+      // setOverlay(previousOverlay);
+      setOverlay('none');
+    } else {
+      onConfirm();
+    }
+  };
 
   return (
     <View
@@ -110,7 +108,7 @@ export const ConfirmationBottomSheet: React.FC = () => {
         >
           <Text style={{ color: grey }}>{cancelText}</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={onConfirm} style={styles.actionButtonRight}>
+        <TouchableOpacity onPress={specializedOnConfirm} style={styles.actionButtonRight}>
           <Text style={{ color: accent_red }}>{confirmText}</Text>
         </TouchableOpacity>
       </View>

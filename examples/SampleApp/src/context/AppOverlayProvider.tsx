@@ -90,7 +90,7 @@ export const AppOverlayProvider: React.FC<{
           </UserInfoOverlayProvider>
         </ChannelInfoOverlayProvider>
       </BottomSheetOverlayProvider>
-      {/* {overlay === 'loading' && <LoadingScreenFull />} */}
+      {overlay === 'loading' && <LoadingScreenFull />}
     </AppOverlayContext.Provider>
   );
 };
