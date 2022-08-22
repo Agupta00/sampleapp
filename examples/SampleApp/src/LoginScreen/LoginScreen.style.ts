@@ -26,8 +26,8 @@ export default StyleSheet.create<Style>({
     backgroundColor: '#f7f7f7',
   },
   logoImageStyle: {
-    width: 200,
-    height: 200,
+    width: 300,
+    height: 300,
     alignSelf: 'center',
   },
   textInputContainer: {
@@ -41,7 +41,7 @@ export default StyleSheet.create<Style>({
   loginButtonStyle: {
     height: 40,
     width: ScreenWidth * 0.9,
-    backgroundColor: '#25a9e2',
+    backgroundColor: '#453837',
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
