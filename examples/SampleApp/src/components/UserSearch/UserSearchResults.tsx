@@ -104,9 +104,17 @@ export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
     },
   } = useTheme();
 
-  const results = (resultsProp || resultsContext).filter(
-    (user) => !user.name?.includes('testid-@4183@-'),
-  );
+  const filteredResults = (resultsProp || resultsContext).filter((user) => {
+    const shouldFilter =
+      user.name?.includes('testid-@4183@-') ||
+      (!__DEV__ &&
+        (user.name?.includes('test1') ||
+          user.name?.includes('test2') ||
+          user.name?.includes('test3')));
+    return !shouldFilter;
+  });
+
+  const results = filteredResults;
   const resultsLength = results.length;
   useEffect(() => {
     const newSections: {
