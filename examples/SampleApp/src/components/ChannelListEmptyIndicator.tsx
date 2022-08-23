@@ -51,9 +51,10 @@ export const ChannelListEmptyIndicator: React.FC<EmptyStateProps> = ({ listType 
             testID='empty-channel-state-details'
           >
             {`1. Start a new game by creating a group chat.\n\n`}
-            {`2. Hit the 'Start Game' button in the side bar when you are ready to play!\n\n`}
-            {`3. Tag your player and mark them as tagged\n\n`}
-            {`4. Last one standing wins!\n\n`}
+            {`2. Have the players join the game (min 3 players).\n\n`}
+            {`3. Hit the 'Start Game' button in the side bar when you are ready to play!\n\n`}
+            {`4. Tag your player and mark them as tagged\n\n`}
+            {`5. Last one standing wins!\n\n`}
           </Text>
         </View>
       );
