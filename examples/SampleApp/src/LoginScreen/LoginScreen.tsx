@@ -50,7 +50,7 @@ const LoginScreen = ({ navigation }) => {
             })
               .then((res: any) => {
                 if (res.error) {
-                  setErrors({ password: res.error });
+                  setErrors(res.error);
                 } else {
                   loginUser({ apiKey: 'qkytr4kxy8c5', userId: res.id, userToken: res.token });
                 }
