@@ -17,6 +17,7 @@ import type { UserResponse } from 'stream-chat';
 
 import type { StreamChatGenerics } from '../../types';
 import { Search } from '../../icons/Search';
+import { filterUsers } from './filterUsers';
 
 const styles = StyleSheet.create({
   absolute: { position: 'absolute' },
@@ -104,15 +105,7 @@ export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
     },
   } = useTheme();
 
-  const filteredResults = (resultsProp || resultsContext).filter((user) => {
-    const shouldFilter =
-      user.name?.includes('testid-@4183@-') ||
-      (!__DEV__ &&
-        (user.name?.includes('test1') ||
-          user.name?.includes('test2') ||
-          user.name?.includes('test3')));
-    return !shouldFilter;
-  });
+  const filteredResults = filterUsers(resultsProp || resultsContext);
 
   const results = filteredResults;
   const resultsLength = results.length;
@@ -126,7 +119,6 @@ export const UserSearchResults: React.FC<UserSearchResultsProps> = ({
 
     results.forEach((user) => {
       const initial = user.name?.slice(0, 1).toUpperCase();
-      console.log(user.name);
 
       if (!initial) return;
 

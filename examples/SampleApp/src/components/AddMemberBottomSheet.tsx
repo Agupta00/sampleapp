@@ -16,6 +16,7 @@ import { usePaginatedUsers } from '../hooks/usePaginatedUsers';
 import type { UserResponse } from 'stream-chat';
 
 import { StreamChatGenerics } from '../types';
+import { filterUsers } from './UserSearch/filterUsers';
 
 const styles = StyleSheet.create({
   container: {
@@ -85,15 +86,7 @@ export const AddMemberBottomSheet: React.FC = () => {
   const [addMemberQueryInProgress, setAddMemberQueryInProgress] = useState(false);
   const [error, setError] = useState(false);
 
-  const filteredResults = results.filter((user) => {
-    const shouldFilter =
-      user.name?.includes('testid-@4183@-') ||
-      (!__DEV__ &&
-        (user.name?.includes('test1') ||
-          user.name?.includes('test2') ||
-          user.name?.includes('test3')));
-    return !shouldFilter;
-  });
+  const filteredResults = filterUsers(results);
 
   if (!channel) {
     return null;
